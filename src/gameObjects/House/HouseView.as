@@ -10,6 +10,9 @@ package gameObjects.House
 import flash.display.MovieClip;
 import flash.events.MouseEvent;
 import flash.geom.Point;
+import flash.text.TextFormat;
+
+import gameObjects.BaseView;
 
 import gameObjects.BaseView;
 import gameObjects.IDisposable;
@@ -39,6 +42,7 @@ public class HouseView extends BaseView implements IDisposable
      * Fields
      */
     private var _textFieldSoldiersCount:TextField;
+    private var _textFormat: TextFormat;
 
     private var _owner:House;
     private var _ownerType:EHouseType;
@@ -53,7 +57,7 @@ public class HouseView extends BaseView implements IDisposable
 
     private var _auraView:Sprite;
 
-    private var _indicatorLevel:MovieClip;
+    private var _indicatorLevel:Sprite;
     private var _indicatorLevelUp:MovieClip;
 
 
@@ -106,6 +110,7 @@ public class HouseView extends BaseView implements IDisposable
         _ownerSoldiersCount = _owner.soldierCount;
 
         _textFieldSoldiersCount.text = String(_ownerSoldiersCount);
+        _textFieldSoldiersCount.setTextFormat(_textFormat);
 
         if (_indicatorLevelUp)
         {
@@ -137,7 +142,7 @@ public class HouseView extends BaseView implements IDisposable
 
         tryCreateHouseView();
 
-        tryCreateIndicatorLevel();
+        //tryCreateIndicatorLevel();
 
         if (_indicatorLevelUp)
         {
@@ -159,7 +164,7 @@ public class HouseView extends BaseView implements IDisposable
             var houseClass:Class = ResourceManager.getHouseClassByTypeAndLevel(_ownerType, _ownerLevel);
             _houseView = new houseClass();
 
-            this.eventHandler = _houseView;
+            this.eventHandler = this;
 
             addChild(_houseView);
         }
@@ -250,9 +255,19 @@ public class HouseView extends BaseView implements IDisposable
         }
 
         _textFieldSoldiersCount = new TextField();
+
+        _textFormat = new TextFormat();
+        _textFormat.font = "Arial";
+        _textFormat.size = 10;
+        _textFormat.bold = true;
+
+
         _textFieldSoldiersCount.text = String(_owner.soldierCount);
+        _textFieldSoldiersCount.setTextFormat(_textFormat);
         _textFieldSoldiersCount.selectable = false;
         _textFieldSoldiersCount.width = 30;
+        _textFieldSoldiersCount.textColor = 0xFFFFFF;
+
 
         _textFieldSoldiersCount.x = 0;
         _textFieldSoldiersCount.y = -50;
@@ -288,33 +303,52 @@ public class HouseView extends BaseView implements IDisposable
      */
     protected override function didMouseOver(e:Event):void
     {
-        _auraView.visible = true;
-
+        if(BaseView.viewSelected.length > 0 || _owner.type == EHouseType.EHT_PLAYER)
+        {
+            _auraView.visible = true;
+        }
         super.didMouseOver(e);
     }
 
     protected override function didMouseOut(e:Event):void
     {
-        //! For selected house aura view should be visible
-        if (viewSelected != this)
+        var func: Function = function(element:*, index:int, arr:Array):Boolean
+        {
+           return (element == this)
+        }
+
+        if (BaseView.viewSelected.length > 0)
+        {
+            if (BaseView.viewSelected.some(func)
+                    || _owner.type != EHouseType.EHT_PLAYER)
+            {
+                _auraView.visible = false;
+            }
+            if (!BaseView.viewSelected.some(func)
+                    && _owner.type == EHouseType.EHT_PLAYER)
+            {
+                showArrow();
+            }
+        }
+        else
         {
             _auraView.visible = false;
         }
 
-        super.didMouseOut(e);
+        if (_owner.type == EHouseType.EHT_PLAYER)
+        {
+            super.didMouseOut(e);
+        }
     }
 
     //! Override from ButtonBase
     protected override function didMouseUp(e:Event):void
     {
         //if selected house does not exist
-        if (BaseView.viewSelected == null || BaseView.viewSelected == this)
-        {
-            //Do nothing
-            return;
-        }
-
-        _owner.didMouseUp();
+       if(BaseView.viewSelected.length > 0)
+       {
+           _owner.didMouseUp();
+       }
 
         super.didMouseUp(e);
     }
@@ -324,9 +358,8 @@ public class HouseView extends BaseView implements IDisposable
         if (_ownerType == EHouseType.EHT_PLAYER)
         {
             showArrow();
+            super.didMouseDown(e);
         }
-
-        super.didMouseDown(e);
     }
 
     protected override function didDoubleClick(e:Event):void

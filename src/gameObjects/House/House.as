@@ -229,15 +229,21 @@ public class House implements IDisposable
     public function didMouseUp():void
     {
         if (BaseView.viewHovered != null
-                && BaseView.viewSelected != null
-                && BaseView.viewSelected != BaseView.viewHovered
-                && BaseView.viewHovered is HouseView
-                && BaseView.viewSelected is HouseView)
+                && BaseView.viewSelected.length > 0)
         {
-            var houseViewSelected:HouseView = BaseView.viewSelected as HouseView;
-            var houseViewHovered:HouseView = BaseView.viewHovered as HouseView;
+            for each(var obj: BaseView in BaseView.viewSelected)
+            {
+                if (obj != BaseView.viewHovered
+                    && BaseView.viewHovered is HouseView
+                        && obj is HouseView)
+                {
+                    var houseViewSelected:HouseView = obj as HouseView;
+                    var houseViewHovered:HouseView = BaseView.viewHovered as HouseView;
 
-            SharedSoldierGenerator.Instance.generateSoldiers(houseViewSelected.Owner, houseViewHovered.Owner);
+                    SharedSoldierGenerator.Instance.generateSoldiers(houseViewSelected.Owner, houseViewHovered.Owner);
+                }
+            }
+
         }
     }
 

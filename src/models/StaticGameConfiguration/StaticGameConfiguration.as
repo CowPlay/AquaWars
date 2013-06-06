@@ -48,7 +48,7 @@ public class StaticGameConfiguration
             case EHouseType.EHT_PLAYER:
             case EHouseType.EHT_ENEMY:
             {
-                result = 5;
+                result = 2;
 
                 break;
             }

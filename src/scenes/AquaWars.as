@@ -59,7 +59,9 @@ public class AquaWars extends BaseView
      */
     public function AquaWars()
     {
+
         _scene = this;
+
 
         var backgroundClass:Class = ResourceManager.getSceneBackground();
 
@@ -68,7 +70,7 @@ public class AquaWars extends BaseView
         addChild(_background);
 
         this.eventHandler = _background;
-
+        mouseChildren = true;
         graphics.beginFill(0x777777, 1);
         graphics.drawRect(0, 0, 800, 600);
         graphics.endFill();
@@ -127,7 +129,7 @@ public class AquaWars extends BaseView
     {
         var _house1:House = House.HouseWithType(EHouseType.EHT_PLAYER, 10);
 
-        _house1.setPosition(10, 10);
+        _house1.setPosition(10, 5);
 
         addChild(_house1.view);
 
@@ -136,6 +138,18 @@ public class AquaWars extends BaseView
         _house2.setPosition(15, 40);
 
         addChild(_house2.view);
+
+        var _house3:House = House.HouseWithType(EHouseType.EHT_PLAYER, 9);
+
+        _house3.setPosition(3, 10);
+
+        addChild(_house3.view);
+
+        var _house4:House = House.HouseWithType(EHouseType.EHT_ENEMY, 9);
+
+        _house4.setPosition(45, 25);
+
+        addChild(_house4.view);
     }
 
     private function DrawPath(nodes:Array):void

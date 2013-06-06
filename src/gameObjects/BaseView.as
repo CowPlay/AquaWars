@@ -26,7 +26,7 @@ public class BaseView extends MovieClip
      */
     private static var _viewHovered:BaseView;
 
-    private static var _viewSelected:BaseView;
+    private static var _viewSelected:Array = new Array();
 
     /*
      * Static methods
@@ -39,7 +39,7 @@ public class BaseView extends MovieClip
     }
 
     //! Returns view which currently mouse selected
-    public static function get viewSelected():BaseView
+    public static function get viewSelected():Array
     {
         return _viewSelected;
     }
@@ -69,17 +69,26 @@ public class BaseView extends MovieClip
 
             _eventHandler.removeEventListener(MouseEvent.MOUSE_DOWN, didMouseDown);
             _eventHandler.removeEventListener(MouseEvent.MOUSE_UP, didMouseUp);
+            _eventHandler.removeEventListener(MouseEvent.DOUBLE_CLICK, didDoubleClick);
         }
 
         _eventHandler = value;
 
+
+
+
+
         if (_eventHandler)
         {
+
+            _eventHandler.doubleClickEnabled = true;
+            _eventHandler.mouseChildren = false;
             _eventHandler.addEventListener(MouseEvent.MOUSE_OVER, didMouseOver);
             _eventHandler.addEventListener(MouseEvent.MOUSE_OUT, didMouseOut);
 
             _eventHandler.addEventListener(MouseEvent.MOUSE_DOWN, didMouseDown);
             _eventHandler.addEventListener(MouseEvent.MOUSE_UP, didMouseUp);
+            _eventHandler.addEventListener(MouseEvent.DOUBLE_CLICK, didDoubleClick);
         }
     }
 
@@ -90,10 +99,10 @@ public class BaseView extends MovieClip
     //! Default constructor
     public function BaseView()
     {
-        doubleClickEnabled = true;
 
-        //TODO: review
-//        mouseChildren = true;
+
+
+
     }
 
     public function cleanup():void
@@ -113,10 +122,12 @@ public class BaseView extends MovieClip
 
     protected function didMouseOver(e:Event):void
     {
-        if (this is HouseView)
+        if ((this is HouseView)
+                && (_viewSelected.length > 0))
         {
             _viewHovered = this;
         }
+
     }
 
     protected function didMouseOut(e:Event):void
@@ -124,6 +135,7 @@ public class BaseView extends MovieClip
         if (_viewHovered == this)
         {
             _viewHovered = null;
+            _viewSelected.push(this);
         }
     }
 
@@ -131,17 +143,23 @@ public class BaseView extends MovieClip
     {
         if (this is HouseView)
         {
-            _viewSelected = this;
+            _viewSelected.push(this);
         }
     }
 
     protected function didMouseUp(e:Event):void
     {
-        if (_viewSelected != null && _viewSelected != this)
+        if (_viewSelected.length > 0)
         {
-            _viewSelected.didMouseUpOut();
+            for each(var baseView: BaseView in _viewSelected)
+            {
+               if (baseView != this)
+               {
+                   baseView.didMouseUpOut();
+               }
+            }
         }
-        _viewSelected = null;
+        _viewSelected = [];
     }
 
     protected function didMouseUpOut():void

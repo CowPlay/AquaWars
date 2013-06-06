@@ -125,16 +125,15 @@ public class SharedSoldierGenerator
 
         var tweenX:Tween = new Tween(soldier.soldierView, "x", None.easeNone, nodeFrom.view.x, nodeTo.view.x, 1 / soldier.speed, true);
         var tweenY:Tween = new Tween(soldier.soldierView, "y", None.easeNone, nodeFrom.view.y, nodeTo.view.y, 1 / soldier.speed, true);
-
-        //TODO: review event
+        soldier.soldierView.tween(tweenX, tweenY);
         tweenX.addEventListener(TweenEvent.MOTION_FINISH, didMovementFinish);
+        //TODO: review event
     }
 
     private function didMovementFinish(e:Event):void
     {
         var target:Tween = e.target as Tween;
         target.removeEventListener(TweenEvent.MOTION_FINISH, didMovementFinish);
-
         var soldierView:SoldierView = e.target.obj as SoldierView;
 
         var soldierPath:Array = soldierView.owner.path;
@@ -150,7 +149,7 @@ public class SharedSoldierGenerator
         {
             soldierView.owner.houseTarget.didAttack(soldierView.owner);
 
-            soldierView.owner.cleanup()
+            soldierView.owner.cleanup();
         }
         else
         {

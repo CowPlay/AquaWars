@@ -7,6 +7,8 @@
  */
 package gameObjects.Soldier
 {
+import fl.transitions.Tween;
+
 import gameObjects.BaseView;
 
 import models.ResourceManager.ResourceManager;
@@ -23,6 +25,10 @@ public class SoldierView extends BaseView
     private var _soldierView:MovieClip;
 
     private var _soldierRotation:ESoldierRotation;
+
+    private var _tweenX: Tween;
+    private var _tweenY: Tween;
+
     /*
      * Properties
      */
@@ -116,6 +122,12 @@ public class SoldierView extends BaseView
     /*
      * IDisposable
      */
+
+    public function tween(tweenX: Tween, tweenY: Tween):void
+    {
+        _tweenX = tweenX;
+        _tweenY = tweenY;
+    }
 
     public override function cleanup():void
     {
