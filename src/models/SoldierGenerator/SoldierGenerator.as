@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-package models.SharedSoldierGenerator
+package models.SoldierGenerator
 {
 import flash.events.TimerEvent;
 import flash.utils.Timer;
@@ -22,40 +22,17 @@ import fl.transitions.easing.None;
 
 import flash.events.Event;
 
-import models.SharedPathfinder.INode;
-import models.SharedPathfinder.Node;
+import models.GameInfo.GameInfo;
 
-import models.SharedPathfinder.SharedPathfinder;
+import models.Pathfinder.INode;
+import models.Pathfinder.Node;
+
+import models.Pathfinder.Pathfinder;
 
 import scenes.AquaWars;
 
-public class SharedSoldierGenerator
+public class SoldierGenerator
 {
-    /*
-     * Singleton realization
-     */
-
-    private static const _instance:SharedSoldierGenerator = new SharedSoldierGenerator();
-
-    //Переменная доступа
-    private static var _isConstructing:Boolean;
-
-    //! Default constructor
-    public function SharedSoldierGenerator()
-    {
-        if (_instance)
-        {
-            throw new Error("Class is singleton.");
-        }
-
-        init();
-    }
-
-    public static function get Instance():SharedSoldierGenerator
-    {
-        return _instance;
-    }
-
     /*
      * Fields
      */
@@ -64,15 +41,26 @@ public class SharedSoldierGenerator
 
     private var _soldierWaves:Array;
 
+//    private var _currentDate:Date;
+
     /*
      * Methods
      */
+
+
+    //! Default constructor
+    public function SoldierGenerator()
+    {
+        init();
+    }
 
     private function init():void
     {
         _soldierWaves = [];
 
-        _timerSoldierGenerator = new Timer(1000);
+//        _currentDate = new Date();
+
+        _timerSoldierGenerator = new Timer(250);
         _timerSoldierGenerator.addEventListener(TimerEvent.TIMER, processWave);
         _timerSoldierGenerator.start();
     }
@@ -84,26 +72,39 @@ public class SharedSoldierGenerator
 
         var newWave:SoldierWaveInfo = new SoldierWaveInfo();
 
-        newWave.generatedSoldierMax = 10; //TODO: make configurable
+        newWave.generatedSoldierRest = 10; //TODO: make configurable
         newWave.owner = owner;
         newWave.target = target;
+        newWave.timeGeneratedFrequency = 300;
 
         _soldierWaves.push(newWave);
     }
 
     private function processWave(e:Event):void
     {
-        for each(var _waveInfo:SoldierWaveInfo in _soldierWaves)
+        var wavesForRemove:Array = [];
+
+        for each(var waveInfo:SoldierWaveInfo in _soldierWaves)
         {
-            if (_waveInfo.generatedSoldierMax == 0)
+            if (waveInfo.generatedSoldierRest == 0)
             {
-                //TODO: remove from array
+                wavesForRemove.push(waveInfo);
                 continue;
             }
 
-            //TODO: add last generated time  and change timer from 1000 to 250
+            var currentTime:Number = new Date().time;
 
-            var newSoldier:Soldier = new Soldier(_waveInfo.owner, _waveInfo.target);
+            var isFirstProcess:Boolean = waveInfo.timeGeneratedLast == 0;
+            var isTimeForGenerate:Boolean = currentTime - waveInfo.timeGeneratedLast > waveInfo.timeGeneratedFrequency;
+
+            if (!isFirstProcess && !isTimeForGenerate)
+            {
+                continue;
+            }
+
+            waveInfo.timeGeneratedLast = currentTime;
+
+            var newSoldier:Soldier = new Soldier(waveInfo.owner, waveInfo.target);
 
             newSoldier.soldierView.x = newSoldier.currentPosition.view.x + Math.round(newSoldier.soldierView.width / 2) - Node.NodeWidthHalf;
             newSoldier.soldierView.y = newSoldier.currentPosition.view.y;
@@ -112,7 +113,14 @@ public class SharedSoldierGenerator
 
             moveSoldierToNextNode(newSoldier);
 
-            _waveInfo.generatedSoldierMax--;
+            waveInfo.generatedSoldierRest--;
+        }
+
+        //remove waves which done
+        for each(var waveInfoRemove:SoldierWaveInfo in wavesForRemove)
+        {
+            var waveIndex:int = _soldierWaves.indexOf(waveInfoRemove);
+            _soldierWaves.splice(waveIndex, waveIndex + 1);
         }
     }
 
@@ -125,9 +133,10 @@ public class SharedSoldierGenerator
 
         var tweenX:Tween = new Tween(soldier.soldierView, "x", None.easeNone, nodeFrom.view.x, nodeTo.view.x, 1 / soldier.speed, true);
         var tweenY:Tween = new Tween(soldier.soldierView, "y", None.easeNone, nodeFrom.view.y, nodeTo.view.y, 1 / soldier.speed, true);
-        soldier.soldierView.tween(tweenX, tweenY);
+
+        soldier.soldierView.setTransportableTweens(tweenX, tweenY);
+
         tweenX.addEventListener(TweenEvent.MOTION_FINISH, didMovementFinish);
-        //TODO: review event
     }
 
     private function didMovementFinish(e:Event):void
@@ -138,16 +147,12 @@ public class SharedSoldierGenerator
 
         var soldierPath:Array = soldierView.owner.path;
 
-        //TODO:remove first another way
-        {   //remove first node
-            soldierPath.reverse();
-            soldierPath.pop();
-            soldierPath.reverse();
-        }
+        //remove first node
+        soldierPath.splice(0, 1);
 
         if (soldierPath[soldierPath.length - 1] == soldierPath[0])
         {
-            soldierView.owner.houseTarget.didAttack(soldierView.owner);
+            soldierView.owner.houseTarget.didReceiveSoldier(soldierView.owner);
 
             soldierView.owner.cleanup();
         }

@@ -1,4 +1,4 @@
-package models.SharedPathfinder
+package models.Pathfinder
 {
 import gameObjects.BaseView;
 import gameObjects.IDisposable;
@@ -31,6 +31,8 @@ public interface INode extends IDisposable
     function set parentNode(value:INode):void;
 
     function set traversable(value:Boolean):void;
+
+    function drawDebugData(color:uint):void;
 
     function toString():String;
 }

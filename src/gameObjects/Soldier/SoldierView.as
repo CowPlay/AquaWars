@@ -26,8 +26,8 @@ public class SoldierView extends BaseView
 
     private var _soldierRotation:ESoldierRotation;
 
-    private var _tweenX: Tween;
-    private var _tweenY: Tween;
+    private var _tweenX:Tween;
+    private var _tweenY:Tween;
 
     /*
      * Properties
@@ -118,20 +118,23 @@ public class SoldierView extends BaseView
         addChild(_soldierView);
     }
 
-
-    /*
-     * IDisposable
-     */
-
-    public function tween(tweenX: Tween, tweenY: Tween):void
+    public function setTransportableTweens(tweenX:Tween, tweenY:Tween):void
     {
         _tweenX = tweenX;
         _tweenY = tweenY;
     }
 
+
+    /*
+     * IDisposable
+     */
+
     public override function cleanup():void
     {
         removeChild(_soldierView);
+
+        _tweenX = null;
+        _tweenX = null;
 
         super.cleanup();
     }

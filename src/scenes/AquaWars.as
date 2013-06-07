@@ -18,14 +18,15 @@ import gameObjects.House.EHouseType;
 import gameObjects.House.House;
 
 import models.GameConstants.GameConstants;
+import models.GameInfo.GameInfo;
 
 import models.ResourceManager.ResourceManager;
 
 
-import models.SharedPathfinder.INode;
-import models.SharedPathfinder.Node;
-import models.SharedPathfinder.SharedPathfinder;
-import models.SharedSoldierGenerator.SharedSoldierGenerator;
+import models.Pathfinder.INode;
+import models.Pathfinder.Node;
+import models.Pathfinder.Pathfinder;
+import models.SoldierGenerator.SoldierGenerator;
 
 import mx.resources.ResourceBundle;
 
@@ -80,31 +81,26 @@ public class AquaWars extends BaseView
 
     private function init():void
     {
-        initSingletones();
+        initGrid();
 
-        if (GameConstants.SHOW_DEBUG_DATA)
+        GameInfo.Instance.houseManager.initLevelHouses();
+
+        for each(var house:House in GameInfo.Instance.houseManager.houses)
         {
-            showGrid();
+            AquaWars.scene.addChild(house.view);
         }
 
-        initHouses();
+        GameInfo.Instance.pathfinder.generateLevelPaths();
     }
 
-    private static function initSingletones():void
-    {
-        var pathFinder:SharedPathfinder = SharedPathfinder.Instance;
-        var soldierGenerator:SharedSoldierGenerator = SharedSoldierGenerator.Instance;
-
-    }
-
-    private function showGrid():void
+    private function initGrid():void
     {
         var startX:int = 0;
         var startY:int = 400;
 
-        var grid:Array = SharedPathfinder.Instance.grid;
+        var grid:Array = GameInfo.Instance.pathfinder.grid;
 
-        var firstNode:INode = (SharedPathfinder.Instance.grid[0] as Array)[0] as INode;
+        var firstNode:INode = (GameInfo.Instance.pathfinder.grid[0] as Array)[0] as INode;
 
         for (var currentRow:int = 0; currentRow < grid.length; currentRow++)
         {
@@ -120,49 +116,9 @@ public class AquaWars extends BaseView
                 node.view.x = startX + currentColumn * Node.NodeWidthHalf;
                 node.view.y = startY - currentColumn * Node.NodeHeightHalf;
 
-                addChild(node as BaseView);
+                addChild(node.view);
             }
         }
     }
-
-    private function initHouses():void
-    {
-        var _house1:House = House.HouseWithType(EHouseType.EHT_PLAYER, 10);
-
-        _house1.setPosition(10, 5);
-
-        addChild(_house1.view);
-
-        var _house2:House = House.HouseWithType(EHouseType.EHT_ENEMY, 9);
-
-        _house2.setPosition(15, 40);
-
-        addChild(_house2.view);
-
-        var _house3:House = House.HouseWithType(EHouseType.EHT_PLAYER, 9);
-
-        _house3.setPosition(3, 10);
-
-        addChild(_house3.view);
-
-        var _house4:House = House.HouseWithType(EHouseType.EHT_ENEMY, 9);
-
-        _house4.setPosition(45, 25);
-
-        addChild(_house4.view);
-    }
-
-    private function DrawPath(nodes:Array):void
-    {
-        GameUtils.assert(nodes != null && nodes.length > 0);
-
-        for (var i:int = 0; i < nodes.length; ++i)
-        {
-            var n:Node = nodes[i];
-            n.highlight(0xFFFF00);
-        }
-    }
-
-
 }
 }

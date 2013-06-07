@@ -17,5 +17,36 @@ public final class EHouseType
     public function EHouseType()
     {
     }
+
+    public function toString():String
+    {
+        var result:String;
+
+        switch (this)
+        {
+            case EHT_PLAYER:
+            {
+                result = "EHT_PLAYER";
+                break;
+            }
+            case EHT_ENEMY:
+            {
+                result = "EHT_ENEMY";
+                break;
+            }
+            case EHT_NEUTRAL:
+            {
+                result = "EHT_NEUTRAL";
+                break;
+            }
+            default :
+            {
+                GameUtils.assert(false);
+                break;
+            }
+        }
+
+        return result;
+    }
 }
 }

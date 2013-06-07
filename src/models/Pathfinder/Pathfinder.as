@@ -1,35 +1,16 @@
-package models.SharedPathfinder
+package models.Pathfinder
 {
 import flash.utils.Dictionary;
 
-import org.osmf.net.StreamingURLResource;
+import gameObjects.House.House;
+
+import models.GameConstants.GameConstants;
+import models.GameInfo.GameInfo;
 
 
 //! Class which contains info about level grid and provide find path functionally
-public class SharedPathfinder
+public class Pathfinder
 {
-    /*
-     * Singleton realization
-     */
-
-    private static const _instance:SharedPathfinder = new SharedPathfinder();
-
-    //! Default constructor
-    public function SharedPathfinder()
-    {
-        if (_instance)
-        {
-            throw new Error("Class is singleton.");
-        }
-
-        Init();
-    }
-
-    public static function get Instance():SharedPathfinder
-    {
-        return _instance;
-    }
-
     /*
      * Static methods
      */
@@ -92,9 +73,6 @@ public class SharedPathfinder
      * Fields
      */
 
-    private static const GRID_COLUMN_COUNT:int = 50;
-    private static const GRID_ROW_COUNT:int = 50;
-
     //! Array of (array of nodes)
     private var _grid:Array;
 
@@ -114,20 +92,26 @@ public class SharedPathfinder
      * Methods
      */
 
-    private function Init():void
+    //! Default constructor
+    public function Pathfinder()
+    {
+        init();
+    }
+
+    private function init():void
     {
         _pathsCache = new Dictionary();
 
         { // Create grid
             _grid = [];
 
-            for (var row:int = 0; row < GRID_ROW_COUNT; row++)
+            for (var row:int = 0; row < GameConstants.GRID_ROW_COUNT; row++)
             {
                 var newRow:Array = [];
 
-                for (var column:int = 0; column < GRID_COLUMN_COUNT; column++)
+                for (var column:int = 0; column < GameConstants.GRID_COLUMN_COUNT; column++)
                 {
-                    var newNode:INode = new Node(row, column);
+                    var newNode:INode = new Node(column, row);
 
                     newRow.push(newNode);
                 }
@@ -137,25 +121,47 @@ public class SharedPathfinder
         }
     }
 
-    public function FindPath(nodeFrom:INode, nodeTo:INode):Array
+    public function getPath(nodeFrom:INode, nodeTo:INode):Array
     {
         var result:Array;
 
-        var findedParhInfo:PathFindedInfo = tryGetPathFromCache(nodeFrom, nodeTo);
+        var pathHash:String = getPathHash(nodeFrom, nodeTo);
 
-        if (findedParhInfo != null)
+        GameUtils.assert(_pathsCache[pathHash] != null);
+
+        return  _pathsCache[pathHash].nodePathClone;
+    }
+
+    public function generateLevelPaths():void
+    {
+        for each(var houseFrom:House in GameInfo.Instance.houseManager.houses)
         {
-            return  findedParhInfo.nodePathClone;
+            for each(var houseTo:House in GameInfo.Instance.houseManager.houses)
+            {
+                if (houseFrom == houseTo)
+                {
+                    continue;
+                }
+
+                var pathHash:String = getPathHash(houseFrom.houseExitPosition, houseTo.houseExitPosition);
+
+                if(_pathsCache[pathHash] == null)
+                {
+                    generateAndAddPath(houseFrom.houseExitPosition, houseTo.houseExitPosition);
+                }
+            }
         }
+    }
+
+    private function generateAndAddPath(nodeFrom:INode, nodeTo:INode):void
+    {
+        var pathHash:String = getPathHash(nodeFrom, nodeTo);
 
         var openNodes:Array = [];
         var closedNodes:Array = [];
 
         var currentNode:INode = nodeFrom;
         var testNode:INode;
-
-        var l:int;
-        var i:int;
 
         var connectedNodes:Array;
         var travelCost:Number = 1.0;
@@ -172,7 +178,7 @@ public class SharedPathfinder
         {
             connectedNodes = FindConnectedNodes(currentNode);
 
-            for (i = 0; i < connectedNodes.length; ++i)
+            for (var i:int = 0; i < connectedNodes.length; ++i)
             {
                 testNode = connectedNodes[i];
 
@@ -182,7 +188,10 @@ public class SharedPathfinder
                 }
 
                 //For our example we will test just highlight all the tested nodes
-                Node(testNode).highlight(0xFF80C0);
+                if (GameConstants.SHOW_ASTAR_PATH_DEBUG)
+                {
+                    testNode.drawDebugData(0x1275D6);
+                }
 
                 //g = currentNode.g + Pathfinder.heuristic( currentNode, testNode, travelCost); //This is what we had to use here at Untold for our situation.
                 //If you have a world where diagonal movements cost more than regular movements then you would need to determine if a movement is diagonal and then adjust
@@ -215,47 +224,43 @@ public class SharedPathfinder
 
             if (openNodes.length == 0)
             {
-                return null;
+                //path does not exist
+                GameUtils.assert(false);
             }
 
             openNodes.sortOn('f', Array.NUMERIC);
             currentNode = openNodes.shift() as INode;
         }
 
-        var newPath:Array = BuildPath(nodeTo, nodeFrom);
+        var generatedPath:Array = BuildPath(nodeTo, nodeFrom);
 
         {//add to cache
-            var pathHash:String = getPathHash(nodeFrom, nodeTo);
-
-            findedParhInfo = new PathFindedInfo(nodeFrom, nodeTo, newPath);
-
-            _pathsCache[pathHash] = findedParhInfo;
-
-            result = findedParhInfo.nodePathClone;
+            //Add finded path to cache
+            _pathsCache[pathHash] = new PathFindedInfo(nodeFrom, nodeTo, generatedPath);
         }
 
-
-        return result;
-    }
-
-//! Return path from cache if exist. Otherwise returns null.
-    private function tryGetPathFromCache(nodeFrom:INode, nodeTo:INode):PathFindedInfo
-    {
-        var result:PathFindedInfo;
-
-        var pathHash:String = getPathHash(nodeFrom, nodeTo);
-
-        result = _pathsCache[pathHash];
-
-        //try reverse path
-        if (result == null)
         {
-            pathHash = getPathHash(nodeTo, nodeFrom);
+            //get info for reversed path
+            var pathHashReversed:String = getPathHash(nodeTo, nodeFrom);
 
-            result = _pathsCache[pathHash];
+            var generatedPathReversed:Array = [];
+
+            for (var nodeIndex:int = generatedPath.length - 1; nodeIndex >= 0; nodeIndex--)
+            {
+                generatedPathReversed.push(generatedPath[nodeIndex]);
+            }
+
+            //Add reversed path to cache
+            _pathsCache[pathHashReversed] = new PathFindedInfo(nodeTo, nodeFrom, generatedPathReversed);
         }
 
-        return result;
+        if (GameConstants.SHOW_ASTAR_PATH_RESULT)
+        {
+            for each(var node:INode in generatedPath)
+            {
+                node.drawDebugData(0xFF80C0);
+            }
+        }
     }
 
 
@@ -264,11 +269,10 @@ public class SharedPathfinder
         var result:Array = [];
 
         var rowMin:int = node.row > 0 ? node.row - 1 : 0;
-        var rowMax:int = node.row < GRID_ROW_COUNT - 1 ? node.row + 1 : GRID_ROW_COUNT - 1;
+        var rowMax:int = node.row < GameConstants.GRID_ROW_COUNT - 1 ? node.row + 1 : GameConstants.GRID_ROW_COUNT - 1;
 
         var columnMin:int = node.column > 0 ? node.column - 1 : node.column;
-        var columnMax:int = node.column < GRID_COLUMN_COUNT - 1 ? node.column + 1 : GRID_COLUMN_COUNT - 1;
-
+        var columnMax:int = node.column < GameConstants.GRID_COLUMN_COUNT - 1 ? node.column + 1 : GameConstants.GRID_COLUMN_COUNT - 1;
 
         for (var currentRow:int = rowMin; currentRow <= rowMax; currentRow++)
         {
@@ -278,11 +282,11 @@ public class SharedPathfinder
             {
                 var connectedNode:INode = row[column];
 
-                //TODO: add if(connected == node) continue;
-                /*if (connectedNode == node)
-                 {
-                 continue;
-                 } */
+                //TODO: test it
+                if (connectedNode == node)
+                {
+                    continue;
+                }
 
                 result.push(connectedNode);
             }
@@ -297,7 +301,7 @@ public class SharedPathfinder
      *    These are our available heuristics
      *
      ******************************************************************************/
-    private function euclidianHeuristic(node:INode, destinationNode:INode, cost:Number = 1.0):Number
+    private static function euclidianHeuristic(node:INode, destinationNode:INode, cost:Number = 1.0):Number
     {
         var dx:Number = node.column - destinationNode.column;
         var dy:Number = node.row - destinationNode.row;
@@ -307,14 +311,14 @@ public class SharedPathfinder
 
 //    public static function manhattanHeuristic(node:INode, destinationNode:INode, cost:Number = 1.0):Number
 //    {
-//        return Math.abs(node.x - destinationNode.x) * cost +
-//                Math.abs(node.y + destinationNode.y) * cost;
+//        return Math.abs(node.column - destinationNode.column) * cost +
+//                Math.abs(node.row + destinationNode.row) * cost;
 //    }
-
+//
 //    public static function diagonalHeuristic(node:INode, destinationNode:INode, cost:Number = 1.0, diagonalCost:Number = 1.0):Number
 //    {
-//        var dx:Number = Math.abs(node.x - destinationNode.x);
-//        var dy:Number = Math.abs(node.y - destinationNode.y);
+//        var dx:Number = Math.abs(node.column - destinationNode.column);
+//        var dy:Number = Math.abs(node.row - destinationNode.row);
 //
 //        var diag:Number = Math.min(dx, dy);
 //        var straight:Number = dx + dy;
@@ -323,12 +327,12 @@ public class SharedPathfinder
 //    }
 
 //! Returns node by row and column index
-    public function getNode(row:int, column:int):INode
+    public function getNode(column:int, row:int):INode
     {
         var result:INode = null;
 
-        GameUtils.assert(0 <= row && row < GRID_ROW_COUNT);
-        GameUtils.assert(0 <= column && column < GRID_COLUMN_COUNT);
+        GameUtils.assert(0 <= row && row < GameConstants.GRID_ROW_COUNT);
+        GameUtils.assert(0 <= column && column < GameConstants.GRID_COLUMN_COUNT);
 
         var rowEntry:Array = _grid[row] as Array;
 

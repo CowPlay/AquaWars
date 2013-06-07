@@ -5,7 +5,7 @@
  * Time: 1:44 AM
  * To change this template use File | Settings | File Templates.
  */
-package models.SharedPathfinder
+package models.Pathfinder
 {
 public class PathFindedInfo
 {

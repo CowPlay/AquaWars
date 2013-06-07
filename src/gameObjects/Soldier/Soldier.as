@@ -10,8 +10,10 @@ package gameObjects.Soldier
 import gameObjects.*;
 import gameObjects.House.House;
 
-import models.SharedPathfinder.INode;
-import models.SharedPathfinder.SharedPathfinder;
+import models.GameInfo.GameInfo;
+
+import models.Pathfinder.INode;
+import models.Pathfinder.Pathfinder;
 
 public class Soldier implements IDisposable
 {
@@ -77,7 +79,7 @@ public class Soldier implements IDisposable
         _houseOwner = owner;
         _houseTarget = target;
 
-        _path = SharedPathfinder.Instance.FindPath(_houseOwner.houseExitPosition, _houseTarget.houseExitPosition);
+        _path = GameInfo.Instance.pathfinder.getPath(_houseOwner.houseExitPosition, _houseTarget.houseExitPosition);
 
         GameUtils.assert(_path.length > 0);
 

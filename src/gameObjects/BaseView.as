@@ -11,12 +11,16 @@ import flash.display.DisplayObjectContainer;
 import flash.display.MovieClip;
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.events.TimerEvent;
+import flash.utils.Timer;
 
 import gameObjects.House.HouseView;
 
+import models.GameConstants.GameConstants;
+
 import scenes.AquaWars;
 
-import scenes.views.arrow.arrow;
+import scenes.views.arrow.ArrowView;
 
 //! Base class of all clickable objects
 public class BaseView extends MovieClip
@@ -26,7 +30,7 @@ public class BaseView extends MovieClip
      */
     private static var _viewHovered:BaseView;
 
-    private static var _viewSelected:Array = new Array();
+    private static var _viewSelected:BaseView;
 
     /*
      * Static methods
@@ -39,7 +43,7 @@ public class BaseView extends MovieClip
     }
 
     //! Returns view which currently mouse selected
-    public static function get viewSelected():Array
+    public static function get viewSelected():BaseView
     {
         return _viewSelected;
     }
@@ -49,6 +53,8 @@ public class BaseView extends MovieClip
      */
 
     private var _eventHandler:DisplayObjectContainer;
+
+    private var _timerDebugDataRenderer:Timer;
 
     /*
      * Properties
@@ -69,25 +75,23 @@ public class BaseView extends MovieClip
 
             _eventHandler.removeEventListener(MouseEvent.MOUSE_DOWN, didMouseDown);
             _eventHandler.removeEventListener(MouseEvent.MOUSE_UP, didMouseUp);
+            _eventHandler.addEventListener(MouseEvent.MOUSE_MOVE, didMouseMove);
             _eventHandler.removeEventListener(MouseEvent.DOUBLE_CLICK, didDoubleClick);
         }
 
         _eventHandler = value;
 
-
-
-
-
         if (_eventHandler)
         {
-
             _eventHandler.doubleClickEnabled = true;
             _eventHandler.mouseChildren = false;
+
             _eventHandler.addEventListener(MouseEvent.MOUSE_OVER, didMouseOver);
             _eventHandler.addEventListener(MouseEvent.MOUSE_OUT, didMouseOut);
 
             _eventHandler.addEventListener(MouseEvent.MOUSE_DOWN, didMouseDown);
             _eventHandler.addEventListener(MouseEvent.MOUSE_UP, didMouseUp);
+            _eventHandler.addEventListener(MouseEvent.MOUSE_MOVE, didMouseMove);
             _eventHandler.addEventListener(MouseEvent.DOUBLE_CLICK, didDoubleClick);
         }
     }
@@ -99,35 +103,36 @@ public class BaseView extends MovieClip
     //! Default constructor
     public function BaseView()
     {
-
-
-
-
+        if (GameConstants.SHOW_DEBUG_DATA)
+        {
+            _timerDebugDataRenderer = new Timer(1000);
+            _timerDebugDataRenderer.addEventListener(TimerEvent.TIMER, showDebugData);
+            _timerDebugDataRenderer.start();
+        }
     }
 
     public function cleanup():void
     {
         this.eventHandler = null;
-
     }
 
     public function update():void
     {
-
     }
 
-    protected function didDoubleClick(e:Event):void
+    protected function showDebugData(e:Event):void
     {
+
     }
+
+
+    /*
+     * Event handlers
+     */
 
     protected function didMouseOver(e:Event):void
     {
-        if ((this is HouseView)
-                && (_viewSelected.length > 0))
-        {
-            _viewHovered = this;
-        }
-
+        _viewHovered = this;
     }
 
     protected function didMouseOut(e:Event):void
@@ -135,36 +140,44 @@ public class BaseView extends MovieClip
         if (_viewHovered == this)
         {
             _viewHovered = null;
-            _viewSelected.push(this);
         }
     }
 
     protected function didMouseDown(e:Event):void
     {
-        if (this is HouseView)
-        {
-            _viewSelected.push(this);
-        }
+        _viewSelected = this;
     }
 
     protected function didMouseUp(e:Event):void
     {
-        if (_viewSelected.length > 0)
+        if (_viewSelected != null && _viewSelected != this)
         {
-            for each(var baseView: BaseView in _viewSelected)
-            {
-               if (baseView != this)
-               {
-                   baseView.didMouseUpOut();
-               }
-            }
+            _viewSelected.didMouseUpOut();
         }
-        _viewSelected = [];
+
+        _viewSelected = null;
     }
 
     protected function didMouseUpOut():void
     {
 
+    }
+
+    protected function didMouseMove(e:Event):void
+    {
+        if (_viewSelected != null && _viewSelected != this)
+        {
+            _viewSelected.didMouseMoveOut(e);
+        }
+    }
+
+    protected function didMouseMoveOut(e:Event):void
+    {
+
+    }
+
+    protected function didDoubleClick(e:Event):void
+    {
     }
 
 

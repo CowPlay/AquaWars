@@ -1,4 +1,4 @@
-package models.SharedPathfinder
+package models.Pathfinder
 {
 
 import gameObjects.BaseView;
@@ -6,6 +6,10 @@ import gameObjects.BaseView;
 import flash.display.MovieClip;
 import flash.display.Sprite;
 import flash.events.Event;
+
+import models.GameConstants.GameConstants;
+
+import scenes.AquaWars;
 
 public class Node extends BaseView implements INode
 {
@@ -58,7 +62,7 @@ public class Node extends BaseView implements INode
     private var _view:Sprite;
 
     //! Default constructor
-    public function Node(row:int, column:int)
+    public function Node(column:int, row:int)
     {
         _row = row;
         _column = column;
@@ -66,16 +70,10 @@ public class Node extends BaseView implements INode
         _view = new _viewClass();
 
         addChild(_view);
+
+        _view.visible = GameConstants.SHOW_GRID;
     }
 
-    public function highlight(color:uint = 0x0080C0):void
-    {
-        this.graphics.clear();
-        this.graphics.lineStyle(2);
-        this.graphics.beginFill(color);
-        this.graphics.drawRect(_view.width * 0.3, _view.height * 0.3, _view.width * 0.3, _view.height * 0.3);
-        this.graphics.endFill();
-    }
 
     /*
      * IDisposable
@@ -155,6 +153,15 @@ public class Node extends BaseView implements INode
     public function get column():int
     {
         return _column;
+    }
+
+    public function drawDebugData(color:uint):void
+    {
+        graphics.clear();
+        graphics.lineStyle(2);
+        graphics.beginFill(color);
+        graphics.drawCircle(_view.width / 2, _view.height / 2, _view.height / 4);
+        graphics.endFill();
     }
 
     public override function toString():String

@@ -7,7 +7,12 @@
  */
 package models.StaticGameConfiguration
 {
+import flash.geom.Point;
+import flash.geom.Rectangle;
+
 import gameObjects.House.EHouseType;
+
+import org.osmf.metadata.CuePoint;
 
 public class StaticGameConfiguration
 {
@@ -55,6 +60,70 @@ public class StaticGameConfiguration
             case EHouseType.EHT_NEUTRAL:
             {
                 result = 0;
+
+                break;
+            }
+            default :
+            {
+                GameUtils.assert(false);
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    public static function getHouseSquare(houseType:EHouseType, level:uint):Rectangle
+    {
+        var result:Rectangle;
+
+        switch (houseType)
+        {
+            case EHouseType.EHT_PLAYER:
+            {
+                result = new Rectangle(1, 0, 3, 4);
+                break;
+            }
+            case EHouseType.EHT_ENEMY:
+            {
+                result = new Rectangle(2, 0, 4, 4);
+                break;
+            }
+            case EHouseType.EHT_NEUTRAL:
+            {
+                result = new Rectangle(0, 0, 4, 4);
+
+                break;
+            }
+            default :
+            {
+                GameUtils.assert(false);
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    public static function getHouseExitPosition(houseType:EHouseType, level:uint):Point
+    {
+        var result:Point;
+
+        switch (houseType)
+        {
+            case EHouseType.EHT_PLAYER:
+            {
+                result = new Point(1, 4);
+                break;
+            }
+            case EHouseType.EHT_ENEMY:
+            {
+                result = new Point(-1, 2);
+                break;
+            }
+            case EHouseType.EHT_NEUTRAL:
+            {
+                result = new Point(0, 0);
 
                 break;
             }

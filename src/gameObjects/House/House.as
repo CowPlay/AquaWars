@@ -8,17 +8,16 @@
 package gameObjects.House
 {
 import flash.events.TimerEvent;
+import flash.geom.Point;
+import flash.geom.Rectangle;
 import flash.utils.Timer;
 
 import gameObjects.*;
-import gameObjects.House.EHouseType;
 import gameObjects.Soldier.Soldier;
 
-import models.SharedPathfinder.INode;
-import models.SharedPathfinder.Node;
-import models.SharedPathfinder.SharedPathfinder;
+import models.GameInfo.GameInfo;
 
-import models.SharedSoldierGenerator.SharedSoldierGenerator;
+import models.Pathfinder.INode;
 
 import flash.events.Event;
 
@@ -36,6 +35,36 @@ public class House implements IDisposable
      * Static functions
      */
 
+    private static var _selectedHouses:Array = [];
+
+    public static function get selectedHouses():Array
+    {
+        return _selectedHouses;
+    }
+
+    public static function clearHouseSelection():void
+    {
+        for each(var house:House in _selectedHouses)
+        {
+            house._view.didHouseSelectionChanged(false);
+
+            trace("clear selection");
+        }
+
+        _selectedHouses = [];
+    }
+
+    public static function selectHouse(value:House):void
+    {
+        GameUtils.assert(value != null);
+
+        if (_selectedHouses.indexOf(value) == -1)
+        {
+            _selectedHouses.push(value);
+
+            trace("select house");
+        }
+    }
 
     /*
      * Fields
@@ -49,7 +78,7 @@ public class House implements IDisposable
 
     //! Use Get\SetSoldierCount
     private var _soldierCount:int;
-    private var _soldierCountMax:int;
+    private var _soldierCountMax:uint;
 
     private var _currentPosition:INode;
     private var _houseExitPosition:INode;
@@ -68,7 +97,7 @@ public class House implements IDisposable
     }
 
     //! Returns soldiers count
-    public function get soldierCount():int
+    public function get soldierCount():uint
     {
         return _soldierCount;
     }
@@ -104,6 +133,9 @@ public class House implements IDisposable
 
         _levelMax = StaticGameConfiguration.getLevelMax(_type);
 
+        //TODO: update square
+        //TODO: update exit position
+
         _view.update();
     }
 
@@ -125,12 +157,15 @@ public class House implements IDisposable
 
         _level = value;
 
+        //TODO: update square
+        //TODO: update exit position
+
         _view.update();
     }
 
     public function get readyToUpdate():Boolean
     {
-        return ((_level < _levelMax) && (_soldierCount == _soldierCountMax));
+        return ((_level < _levelMax) && (_soldierCount >= _soldierCountMax));
     }
 
     public function get currentPosition():INode
@@ -169,7 +204,11 @@ public class House implements IDisposable
                 node.traversable = false;
             }
         }
+    }
 
+    public function getSquare():Array
+    {
+        return _square;
     }
 
 
@@ -211,6 +250,10 @@ public class House implements IDisposable
         {
             this.setSoldierCount(this.soldierCount + 1);
         }
+        else if (_soldierCount > _soldierCountMax)
+        {
+            this.setSoldierCount(this.soldierCount - 1);
+        }
     }
 
     public function didLevelUp():void
@@ -228,79 +271,83 @@ public class House implements IDisposable
     //! Must call when MOUSE_UP event was fire.
     public function didMouseUp():void
     {
+        if (_selectedHouses.length == 0)
+            return;
+
         if (BaseView.viewHovered != null
-                && BaseView.viewSelected.length > 0)
+                && BaseView.viewSelected != null
+                && BaseView.viewHovered is HouseView
+                && BaseView.viewSelected is HouseView)
         {
-            for each(var obj: BaseView in BaseView.viewSelected)
+            var houseHovered:House = (BaseView.viewHovered as HouseView).Owner;
+
+            //generate from all selected houses
+            for each(var houseSelected:House in _selectedHouses)
             {
-                if (obj != BaseView.viewHovered
-                    && BaseView.viewHovered is HouseView
-                        && obj is HouseView)
-                {
-                    var houseViewSelected:HouseView = obj as HouseView;
-                    var houseViewHovered:HouseView = BaseView.viewHovered as HouseView;
+                if (houseHovered == houseSelected)
+                    continue;
 
-                    SharedSoldierGenerator.Instance.generateSoldiers(houseViewSelected.Owner, houseViewHovered.Owner);
-                }
+                GameInfo.Instance.soldierGenerator.generateSoldiers(houseSelected, houseHovered);
             }
-
         }
+
+        clearHouseSelection();
     }
 
-    public function setPosition(row:int, column:int):void
+    public function setPosition(column:int, row:int):void
     {
         GameUtils.assert(row >= 0 && column >= 0);
 
-        _currentPosition = SharedPathfinder.Instance.getNode(row, column);
-        _houseExitPosition = initHouseExitPosition();
+        _currentPosition = GameInfo.Instance.pathfinder.getNode(column, row);
 
-        this.square = InitSquare();
+        updateHouseExitPosition();
+
+        updateSquare();
 
         _view.update();
     }
 
-    //TODO: implement for all house types and levels
-    //TODO: move to GameConfiguration
-    private function initHouseExitPosition():INode
+    private function updateHouseExitPosition():void
     {
-        var result:INode = null;
+        var houseExitPositionOffset:Point = StaticGameConfiguration.getHouseExitPosition(_type, _level);
+        var squareFrame:Rectangle = StaticGameConfiguration.getHouseSquare(_type, _level);
 
-        if (_type == EHouseType.EHT_PLAYER)
-        {
-            result = SharedPathfinder.Instance.getNode(_currentPosition.row + 3, _currentPosition.column + 2);
-        }
-        else if (_type == EHouseType.EHT_ENEMY)
-        {
-            result = SharedPathfinder.Instance.getNode(_currentPosition.row + 2, _currentPosition.column - 1);
-        }
-
-        return result;
+        _houseExitPosition = GameInfo.Instance.pathfinder.getNode(_currentPosition.column + squareFrame.x + houseExitPositionOffset.x,
+                _currentPosition.row + squareFrame.y + houseExitPositionOffset.y);
     }
 
     //! Returns square of specify house
-    //TODO: implement all house types  and levels
-    //TODO: move to GameConfiguration
-    private function InitSquare():Array
+    private function updateSquare():void
     {
-        var result:Array = [];
+        var squareFrame:Rectangle = StaticGameConfiguration.getHouseSquare(_type, _level);
 
-        for (var currentRow:int = _currentPosition.row; currentRow < _currentPosition.row + 4; currentRow++)
+        var squareValue:Array = [];
+
+        for (var currentRow:int = _currentPosition.row + squareFrame.y; currentRow < _currentPosition.row + squareFrame.height + squareFrame.y; currentRow++)
         {
-            for (var currentColumn:int = _currentPosition.column; currentColumn < _currentPosition.column + 4; currentColumn++)
+            for (var currentColumn:int = _currentPosition.column + squareFrame.x; currentColumn < _currentPosition.column + squareFrame.width + squareFrame.x; currentColumn++)
             {
-                var fundamentalNode:INode = SharedPathfinder.Instance.getNode(currentRow, currentColumn);
-                result.push(fundamentalNode);
+                var fundamentalNode:INode = GameInfo.Instance.pathfinder.getNode(currentColumn, currentRow);
+                squareValue.push(fundamentalNode);
             }
         }
 
-        return result;
+        this.square = squareValue;
     }
 
-    public function didAttack(damageCauser:Soldier):void
+    public function didReceiveSoldier(soldier:Soldier):void
     {
-        setSoldierCount(this.soldierCount - damageCauser.damage);
+        var damage:int = soldier.houseOwner.type == this.type ? soldier.damage : -soldier.damage;
 
-        _view.didAttack();
+        setSoldierCount(_soldierCount + damage);
+
+        if (_soldierCount <= 0)
+        {
+            //change type
+            setType(soldier.houseOwner.type);
+        }
+
+        _view.didAttackOrHeal(damage);
     }
 
 
