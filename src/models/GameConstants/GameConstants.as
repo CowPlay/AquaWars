@@ -34,8 +34,5 @@ public class GameConstants
     public static const SHOW_HOUSE_POSITION:Boolean = false;
     public static const SHOW_HOUSE_SQUARE:Boolean = false;
     public static const SHOW_HOUSE_EXIT:Boolean = true;
-
-
-
-}
+git }
 }
