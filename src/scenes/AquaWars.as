@@ -12,6 +12,7 @@ package scenes
 import flash.display.Bitmap;
 import flash.display.MovieClip;
 import flash.display.Sprite;
+import flash.events.Event;
 
 import gameObjects.BaseView;
 import gameObjects.House.EHouseType;
@@ -72,15 +73,14 @@ public class AquaWars extends BaseView
 
         this.eventHandler = _background;
         mouseChildren = true;
-        graphics.beginFill(0x777777, 1);
-        graphics.drawRect(0, 0, 800, 600);
-        graphics.endFill();
 
         init();
     }
 
     private function init():void
     {
+        stage.addEventListener(Event.MOUSE_LEAVE, mouseLeave);
+
         initGrid();
 
         GameInfo.Instance.houseManager.initLevelHouses();
@@ -91,6 +91,11 @@ public class AquaWars extends BaseView
         }
 
         GameInfo.Instance.pathfinder.generateLevelPaths();
+    }
+
+    private function mouseLeave(e: Event):void
+    {
+        BaseView.didMouseLeave();
     }
 
     private function initGrid():void

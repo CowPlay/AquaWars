@@ -51,7 +51,7 @@ public class SoldierView extends BaseView
         {
             case ESoldierRotation.ESR_UP_LEFT:
             {
-                _soldierView.gotoAndStop(0);
+                _soldierView.gotoAndStop(8);
                 break;
             }
             case ESoldierRotation.ESR_UP:

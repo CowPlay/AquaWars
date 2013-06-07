@@ -33,7 +33,7 @@ public class BaseView extends MovieClip
     private static var _viewSelected:BaseView;
 
     /*
-     * Static methods
+     * Static properties
      */
 
     //! Returns view which currently mouse hovered
@@ -46,6 +46,20 @@ public class BaseView extends MovieClip
     public static function get viewSelected():BaseView
     {
         return _viewSelected;
+    }
+
+    /*
+     * Static methods
+     */
+
+    public static function didMouseLeave():void
+    {
+        _viewHovered = null;
+
+        if (_viewSelected != null)
+        {
+            _viewSelected.didMouseUpOut();
+        }
     }
 
     /*
@@ -114,6 +128,9 @@ public class BaseView extends MovieClip
     public function cleanup():void
     {
         this.eventHandler = null;
+
+        _timerDebugDataRenderer.stop();
+        _timerDebugDataRenderer = null;
     }
 
     public function update():void
@@ -170,6 +187,7 @@ public class BaseView extends MovieClip
             _viewSelected.didMouseMoveOut(e);
         }
     }
+
 
     protected function didMouseMoveOut(e:Event):void
     {

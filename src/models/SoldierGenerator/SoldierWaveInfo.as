@@ -18,13 +18,14 @@ public class SoldierWaveInfo
      */
     //TODO: make properties
     public var generatedSoldierRest:uint;
+    public var generatedSoldierCount:uint;
 
     public var owner:House;
     public var target:House;
 
     public var timeGeneratedLast:Number;
-
     public var timeGeneratedFrequency:Number;
+
 
     /*
      * Properties

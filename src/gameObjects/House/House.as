@@ -350,6 +350,13 @@ public class House implements IDisposable
         _view.didAttackOrHeal(damage);
     }
 
+    //TODO: add count parameter
+    public function didSoldierGenerate():void
+    {
+        setSoldierCount(_soldierCount - 1);
+    }
+
+
 
 }
 }
