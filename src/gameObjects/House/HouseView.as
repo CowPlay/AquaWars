@@ -88,6 +88,7 @@ public class HouseView extends BaseView implements IDisposable
     public function didHouseSelectionChanged(isSelect:Boolean):void
     {
         _auraView.visible = isSelect;
+        _arrowView.show(false);
     }
 
     public override function update():void
@@ -343,6 +344,11 @@ public class HouseView extends BaseView implements IDisposable
     {
         _auraView.visible = true;
 
+//        if(House.selectedHouses.indexOf(_owner) != -1)
+//        {
+//            _arrowView.show(false);
+//        }
+
         super.didMouseOver(e);
     }
 
@@ -379,22 +385,20 @@ public class HouseView extends BaseView implements IDisposable
     //! Override from ButtonBase
     protected override function didMouseUp(e:Event):void
     {
+        //generate soldiers, update view
+        _owner.didMouseUp();
+
         //if selected house does not exist
         if (BaseView.viewSelected != null && BaseView.viewSelected != this)
         {
+            //hide arrows
             for each(var house:House in House.selectedHouses)
             {
-                //hide arrows
                 house.view._arrowView.show(false);
             }
-
-            //generate soldiers, update view
-            _owner.didMouseUp();
         }
         else
         {
-            House.clearHouseSelection();
-
             _auraView.visible = true;
 
             if(_arrowView)

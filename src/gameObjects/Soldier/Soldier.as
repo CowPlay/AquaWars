@@ -51,7 +51,7 @@ public class Soldier implements IDisposable
     //! Returns speed value in cells.
     public function get speed():int
     {
-        return 2;
+        return 3;
     }
 
     public function get path():Array

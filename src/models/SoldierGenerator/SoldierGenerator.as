@@ -76,6 +76,7 @@ public class SoldierGenerator
         newWave.owner = owner;
         newWave.target = target;
         newWave.timeGeneratedFrequency = 300;
+        newWave.generatedSoldierCount = 1;
 
         _soldierWaves.push(newWave);
     }
@@ -104,17 +105,19 @@ public class SoldierGenerator
 
             waveInfo.timeGeneratedLast = currentTime;
 
-            var newSoldier:Soldier = new Soldier(waveInfo.owner, waveInfo.target);
+          for (var i:int = 0; i < waveInfo.generatedSoldierCount; i++)
+          {
+              if(waveInfo.owner.soldierCount < 2)
+              {
+                  wavesForRemove.push(waveInfo);
+                  break;
+              }
 
-            newSoldier.soldierView.x = newSoldier.currentPosition.view.x + Math.round(newSoldier.soldierView.width / 2) - Node.NodeWidthHalf;
-            newSoldier.soldierView.y = newSoldier.currentPosition.view.y;
-
-            AquaWars.scene.addChild(newSoldier.soldierView);
-
-            moveSoldierToNextNode(newSoldier);
-
-            waveInfo.generatedSoldierRest--;
+              generateSoldier(waveInfo);
+              waveInfo.generatedSoldierRest--;
+          }
         }
+
 
         //remove waves which done
         for each(var waveInfoRemove:SoldierWaveInfo in wavesForRemove)
@@ -122,6 +125,19 @@ public class SoldierGenerator
             var waveIndex:int = _soldierWaves.indexOf(waveInfoRemove);
             _soldierWaves.splice(waveIndex, waveIndex + 1);
         }
+    }
+
+    private function generateSoldier(waveInfo:SoldierWaveInfo):void
+    {
+        var newSoldier:Soldier = new Soldier(waveInfo.owner, waveInfo.target);
+
+        newSoldier.soldierView.x = newSoldier.currentPosition.view.x + Math.round(newSoldier.soldierView.width / 2) - Node.NodeWidthHalf;
+        newSoldier.soldierView.y = newSoldier.currentPosition.view.y;
+
+        AquaWars.scene.addChild(newSoldier.soldierView);
+        waveInfo.owner.didSoldierGenerate();
+
+        moveSoldierToNextNode(newSoldier);
     }
 
     private function moveSoldierToNextNode(soldier:Soldier):void

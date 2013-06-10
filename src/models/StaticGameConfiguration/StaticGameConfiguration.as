@@ -81,12 +81,12 @@ public class StaticGameConfiguration
         {
             case EHouseType.EHT_PLAYER:
             {
-                result = new Rectangle(1, 0, 3, 4);
+                result = new Rectangle(1, 0, 3, 3);
                 break;
             }
             case EHouseType.EHT_ENEMY:
             {
-                result = new Rectangle(2, 0, 4, 4);
+                result = new Rectangle(3, 0, 3, 4);
                 break;
             }
             case EHouseType.EHT_NEUTRAL:
@@ -113,7 +113,7 @@ public class StaticGameConfiguration
         {
             case EHouseType.EHT_PLAYER:
             {
-                result = new Point(1, 4);
+                result = new Point(1, 3);
                 break;
             }
             case EHouseType.EHT_ENEMY:
