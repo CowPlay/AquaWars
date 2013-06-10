@@ -43,6 +43,7 @@ public class GameInfo
     private var _pathfinder:Pathfinder;
     private var _soldierGenerator:SoldierGenerator;
     private var _houseManager:HouseManager;
+    private var _npsLogic: NPCLogic;
 
     /*
      * Properties
@@ -63,6 +64,11 @@ public class GameInfo
         return _houseManager;
     }
 
+    public function get npsLogic():NPCLogic
+    {
+        return _npsLogic;
+    }
+
     /*
      * Methods
      */
@@ -72,6 +78,8 @@ public class GameInfo
         _pathfinder = new Pathfinder();
         _soldierGenerator = new SoldierGenerator();
         _houseManager = new HouseManager();
+        _npsLogic = new NPCLogic();
+
     }
 
 }

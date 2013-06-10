@@ -8,32 +8,21 @@
 package gameObjects.House
 {
 import flash.display.MovieClip;
+import flash.display.Sprite;
+import flash.events.Event;
 import flash.events.MouseEvent;
-import flash.geom.Point;
+import flash.filters.GlowFilter;
+import flash.text.TextField;
 import flash.text.TextFormat;
-
-import gameObjects.BaseView;
+import flash.utils.setTimeout;
 
 import gameObjects.BaseView;
 import gameObjects.IDisposable;
 
-import flash.filters.GlowFilter;
-import flash.utils.setTimeout;
-
 import models.GameConstants.GameConstants;
-
-import models.ResourceManager.ResourceManager;
-
-import flash.display.Sprite;
-import flash.events.Event;
-
-import flash.text.TextField;
-
 import models.Pathfinder.INode;
-
 import models.Pathfinder.Node;
-
-import scenes.AquaWars;
+import models.ResourceManager.ResourceManager;
 
 import scenes.views.arrow.ArrowView;
 
@@ -59,7 +48,6 @@ public class HouseView extends BaseView implements IDisposable
 
     private var _auraView:Sprite;
 
-    private var _indicatorLevel:Sprite;
     private var _indicatorLevelUp:MovieClip;
 
 
@@ -123,11 +111,11 @@ public class HouseView extends BaseView implements IDisposable
 
         tryCreateHouseView();
 
+        tryCreateTextFieldSoldierCount();
+
         tryCreateArrowView();
 
         tryCreateLevelUpIndicator();
-
-        tryCreateTextFieldSoldierCount();
     }
 
     private function didSoldiersCountChanged():void
@@ -151,7 +139,7 @@ public class HouseView extends BaseView implements IDisposable
 
         tryCreateHouseView();
 
-        //tryCreateIndicatorLevel();
+        tryCreateTextFieldSoldierCount();
 
         if (_indicatorLevelUp)
         {
@@ -166,6 +154,7 @@ public class HouseView extends BaseView implements IDisposable
         if (_houseView != null)
         {
             removeChild(_houseView);
+            _houseView = null;
         }
 
         //Change house view
@@ -179,24 +168,6 @@ public class HouseView extends BaseView implements IDisposable
         }
     }
 
-    private function tryCreateIndicatorLevel():void
-    {
-        if (_indicatorLevel != null)
-        {
-            removeChild(_indicatorLevel);
-        }
-
-        var indicatorLevelClass:Class = ResourceManager.getIndicatorLevel(_ownerLevel);
-
-        if (indicatorLevelClass)
-        {
-            _indicatorLevel = new indicatorLevelClass();
-            _indicatorLevel.x = 10;
-            _indicatorLevel.y = 10;
-
-            addChild(_indicatorLevel);
-        }
-    }
 
     private function tryCreateArrowView():void
     {
@@ -239,14 +210,16 @@ public class HouseView extends BaseView implements IDisposable
     {
         if (_indicatorLevelUp != null)
         {
+            //TODO move change type
             removeChild(_indicatorLevelUp);
+            _indicatorLevelUp = null;
         }
 
         if (_ownerType == EHouseType.EHT_PLAYER)
         {
-            var auraClass:Class = ResourceManager.getIndicatorLevelUpClass();
+            var indicatorClass:Class = ResourceManager.getIndicatorLevelUpClass();
 
-            _indicatorLevelUp = new auraClass();
+            _indicatorLevelUp = new indicatorClass();
             _indicatorLevelUp.x = 11;
             _indicatorLevelUp.y = -37;
 
@@ -279,7 +252,7 @@ public class HouseView extends BaseView implements IDisposable
 
 
         _textFieldSoldiersCount.x = 0;
-        _textFieldSoldiersCount.y = -50;
+        _textFieldSoldiersCount.y = -70;
 
         addChild(_textFieldSoldiersCount);
     }

@@ -7,6 +7,7 @@
  */
 package gameObjects.House
 {
+import flash.events.Event;
 import flash.events.TimerEvent;
 import flash.geom.Point;
 import flash.geom.Rectangle;
@@ -16,13 +17,8 @@ import gameObjects.*;
 import gameObjects.Soldier.Soldier;
 
 import models.GameInfo.GameInfo;
-
 import models.Pathfinder.INode;
-
-import flash.events.Event;
-
 import models.StaticGameConfiguration.StaticGameConfiguration;
-
 
 //! Represents model of House
 public class House implements IDisposable
@@ -337,14 +333,14 @@ public class House implements IDisposable
 
     public function didReceiveSoldier(soldier:Soldier):void
     {
-        var damage:int = soldier.houseOwner.type == this.type ? soldier.damage : -soldier.damage;
+        var damage:int = soldier.type == this.type ? soldier.damage : -soldier.damage;
 
         setSoldierCount(_soldierCount + damage);
 
         if (_soldierCount <= 0)
         {
             //change type
-            setType(soldier.houseOwner.type);
+            setType(soldier.type);
         }
 
         _view.didAttackOrHeal(damage);
