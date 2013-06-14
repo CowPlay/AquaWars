@@ -8,6 +8,7 @@
 package gameObjects.Soldier
 {
 import fl.transitions.Tween;
+import fl.transitions.TweenEvent;
 
 import gameObjects.BaseView;
 
@@ -28,6 +29,7 @@ public class SoldierView extends BaseView
 
     private var _tweenX:Tween;
     private var _tweenY:Tween;
+    private var _tweenEventListener: Function;
 
     /*
      * Properties
@@ -124,10 +126,25 @@ public class SoldierView extends BaseView
         _tweenY = tweenY;
     }
 
+    public function setTweenListenerFunction(func: Function):void
+    {
+        _tweenEventListener = func;
+    }
 
+    public function removeTweenEventListener():void
+    {
+        _tweenX.removeEventListener(TweenEvent.MOTION_FINISH, _tweenEventListener);
+        _tweenX = null;
+        _tweenY = null;
+    }
     /*
      * IDisposable
      */
+
+
+
+
+
 
     public override function cleanup():void
     {

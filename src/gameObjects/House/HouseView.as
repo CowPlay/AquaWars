@@ -39,7 +39,7 @@ public class HouseView extends BaseView implements IDisposable
     private var _ownerType:EHouseType;
     private var _ownerLevel:uint;
     private var _ownerPosition:INode;
-    private var _ownerSoldiersCount:uint;
+    private var _ownerSoldiersCount:int;
 
     //! Represents house view
     private var _houseView:Sprite;
@@ -75,8 +75,11 @@ public class HouseView extends BaseView implements IDisposable
     //TODO: move to update
     public function didHouseSelectionChanged(isSelect:Boolean):void
     {
-        _auraView.visible = isSelect;
-        _arrowView.show(false);
+        if (_arrowView != null)
+        {
+            _auraView.visible = isSelect;
+            _arrowView.show(false);
+        }
     }
 
     public override function update():void
@@ -159,13 +162,18 @@ public class HouseView extends BaseView implements IDisposable
 
         //Change house view
         {
-            var houseClass:Class = ResourceManager.getHouseClassByTypeAndLevel(_ownerType, _ownerLevel);
+            var houseClass:Class = getViewClassByTypeAndLevel(_owner);
             _houseView = new houseClass();
 
             this.eventHandler = this;
 
             addChild(_houseView);
         }
+    }
+
+    protected function getViewClassByTypeAndLevel(owner: House):Class
+    {
+        return ResourceManager.getHouseBaseClassByTypeOwnerAndLevel(_owner);
     }
 
 
@@ -195,7 +203,7 @@ public class HouseView extends BaseView implements IDisposable
         }
 
         //change aura view
-        if (_ownerType != EHouseType.EHT_NEUTRAL)
+        if (true)
         {
             var auraClass:Class = ResourceManager.getHouseAura(_ownerType);
 
@@ -266,7 +274,7 @@ public class HouseView extends BaseView implements IDisposable
     }
 
     //TODO: implement constaint for last time attack
-    public function didAttackOrHeal(damage:int):void
+    public function didAttackOrHeal(damage:Number):void
     {
         var glowFilter:GlowFilter = new GlowFilter(damage < 0 ? 0xff0000 : 0x00ff00, 0.5, 12, 12);
 
@@ -388,7 +396,10 @@ public class HouseView extends BaseView implements IDisposable
         //hide arrows
         for each(var house:House in House.selectedHouses)
         {
-            house.view._arrowView.show(false);
+            if (house.view._arrowView != null)
+            {
+                house.view._arrowView.show(false);
+            }
         }
 
         House.clearHouseSelection();
@@ -418,8 +429,10 @@ public class HouseView extends BaseView implements IDisposable
     {
         for each(var house:House in House.selectedHouses)
         {
-            //update arrow size
-            house.view._arrowView.didMouseMove(e);
+            if (house.view._arrowView != null)
+            {
+                house.view._arrowView.didMouseMove(e);
+            }
         }
     }
 

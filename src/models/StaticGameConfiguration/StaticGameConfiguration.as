@@ -10,10 +10,21 @@ package models.StaticGameConfiguration
 import flash.geom.Point;
 import flash.geom.Rectangle;
 
+import gameObjects.BaseView;
+import gameObjects.Forge.Forge;
+
 import gameObjects.House.EHouseType;
+import gameObjects.House.House;
+import gameObjects.Stable;
+import gameObjects.Tower.Tower;
 
 public class StaticGameConfiguration
 {
+    private static var _enemyDamage: int = 1;
+    private static var _playerDamage: int = 1;
+
+
+
     public static function getSoldiersCountMax(houseType:EHouseType, houseLevel:int):int
     {
         var result:int = 0;
@@ -42,97 +53,188 @@ public class StaticGameConfiguration
         return result;
     }
 
-    public static function getLevelMax(houseType:EHouseType):int
+    public static function getLevelMax(house: House):int
     {
         var result:int = 0;
 
-        switch (houseType)
+        if (house is Tower || house is Forge || house is Stable)
         {
-            case EHouseType.EHT_PLAYER:
-            case EHouseType.EHT_ENEMY:
+            switch (house.type)
             {
-                result = 2;
+                case EHouseType.EHT_PLAYER:
+                case EHouseType.EHT_ENEMY:
+                {
+                    result = 1;
 
-                break;
-            }
-            case EHouseType.EHT_NEUTRAL:
-            {
-                result = 0;
+                    break;
+                }
+                case EHouseType.EHT_NEUTRAL:
+                {
+                    result = 0;
 
-                break;
+                    break;
+                }
+                default :
+                {
+                    GameUtils.assert(false);
+                    break;
+                }
             }
-            default :
+        }
+        else if (house is House)
+        {
+            switch (house.type)
             {
-                GameUtils.assert(false);
-                break;
+                case EHouseType.EHT_PLAYER:
+                case EHouseType.EHT_ENEMY:
+                {
+                    result = 2;
+
+                    break;
+                }
+                case EHouseType.EHT_NEUTRAL:
+                {
+                    result = 0;
+
+                    break;
+                }
+                default :
+                {
+                    GameUtils.assert(false);
+                    break;
+                }
             }
         }
 
         return result;
     }
 
-    public static function getHouseSquare(houseType:EHouseType, level:uint):Rectangle
+    public static function getHouseSquare(house: House):Rectangle
     {
         var result:Rectangle;
 
-        switch (houseType)
+        if (house is Tower)
         {
-            case EHouseType.EHT_PLAYER:
+            result = new Rectangle(2, 1, 3, 3);
+        }
+        else
+        {
+            switch (house.type)
             {
-                result = new Rectangle(1, 0, 4, 4);
-                break;
-            }
-            case EHouseType.EHT_ENEMY:
-            {
-                result = new Rectangle(3, 0, 3, 4);
-                break;
-            }
-            case EHouseType.EHT_NEUTRAL:
-            {
-                result = new Rectangle(0, 0, 4, 4);
+                case EHouseType.EHT_PLAYER:
+                {
+                    result = new Rectangle(1, 0, 4, 4);
+                    break;
+                }
+                case EHouseType.EHT_ENEMY:
+                {
+                    result = new Rectangle(3, 0, 3, 4);
+                    break;
+                }
+                case EHouseType.EHT_NEUTRAL:
+                {
+                    result = new Rectangle(1, 0, 4, 4);
 
-                break;
+                    break;
+                }
+                default :
+                {
+                    GameUtils.assert(false);
+                    break;
+                }
+
             }
-            default :
-            {
-                GameUtils.assert(false);
-                break;
-            }
+
         }
 
         return result;
     }
 
-    public static function getHouseExitPosition(houseType:EHouseType, level:uint):Point
+    public static function getHouseExitPosition(house: House):Point
     {
         var result:Point;
 
-        switch (houseType)
+        if (house is Tower)
         {
-            case EHouseType.EHT_PLAYER:
+            result = new Point(-1, 3);
+        }
+        else
+        {
+            switch (house.type)
             {
-                result = new Point(3, 4);
-                break;
+                case EHouseType.EHT_PLAYER:
+                {
+                    result = new Point(3, 4);
+                    break;
+                }
+                case EHouseType.EHT_ENEMY:
+                {
+                    result = new Point(-1, 2);
+                    break;
+                }
+                case EHouseType.EHT_NEUTRAL:
+                {
+                    result = new Point(3, 4);
+
+                    break;
+                }
+                default :
+                {
+                    GameUtils.assert(false);
+                    break;
+                }
             }
+
+        }
+
+
+
+        return result;
+    }
+
+    public static function getNormalSoldierDamage(owner: EHouseType):int
+    {
+        var result: int;
+        switch (owner)
+        {
             case EHouseType.EHT_ENEMY:
             {
-                result = new Point(-1, 2);
+                result = _enemyDamage;
                 break;
             }
+
+            case EHouseType.EHT_PLAYER:
+            {
+                result = _playerDamage;
+                break;
+            }
+
             case EHouseType.EHT_NEUTRAL:
             {
-                result = new Point(0, 0);
-
+                result = 1;
                 break;
             }
+
             default :
             {
                 GameUtils.assert(false);
                 break;
             }
+
         }
 
         return result;
+    }
+
+
+    public static function setNormalEnemyDamage(damage: int):void
+    {
+        _enemyDamage = damage;
+    }
+
+    public static function setNormalPlayerDamage(damage: int):void
+    {
+        _playerDamage = damage;
     }
 
 }

@@ -14,7 +14,9 @@ import flash.geom.Rectangle;
 import flash.utils.Timer;
 
 import gameObjects.*;
+import gameObjects.Forge.Forge;
 import gameObjects.Soldier.Soldier;
+import gameObjects.Tower.Tower;
 
 import models.GameInfo.GameInfo;
 import models.Pathfinder.INode;
@@ -66,14 +68,14 @@ public class House implements IDisposable
      * Fields
      */
     //! Represents house type
-    private var _type:EHouseType;
+    protected var _type:EHouseType;
     private var _level:uint;
     private var _levelMax:uint;
 
     private var _view:HouseView;
 
     //! Use Get\SetSoldierCount
-    private var _soldierCount:int;
+    private var _soldierCount: Number;
     private var _soldierCountMax:uint;
 
     private var _currentPosition:INode;
@@ -93,12 +95,12 @@ public class House implements IDisposable
     }
 
     //! Returns soldiers count
-    public function get soldierCount():uint
+    public function get soldierCount():Number
     {
         return _soldierCount;
     }
 
-    private function setSoldierCount(value:uint):void
+    private function setSoldierCount(value:Number):void
     {
         if (_soldierCount != value)
         {
@@ -127,13 +129,24 @@ public class House implements IDisposable
 
         _type = type;
 
-        _levelMax = StaticGameConfiguration.getLevelMax(_type);
+        _levelMax = StaticGameConfiguration.getLevelMax(this);
 
         //TODO: update square
         //TODO: update exit position
 
         _view.update();
+
+        //TODO must by only Forge
+        didSetType();
     }
+
+    protected function didSetType():void
+    {
+
+    }
+
+
+
 
     public function get level():uint
     {
@@ -213,21 +226,21 @@ public class House implements IDisposable
      */
 
     //! Return new instance of House with soldiers.
-    public static function HouseWithType(type:EHouseType, soldiersCount:int):House
-    {
-        var result:House = new House();
+    //public static function HouseWithType(type:EHouseType, soldiersCount:int):House
+    //{
+       // var result:House = new House();
 
-        result.setSoldierCount(soldiersCount);
+       // result.setSoldierCount(soldiersCount);
 
-        result.setType(type);
+        //result.setType(type);
 
-        return result;
-    }
+        //return result;
+    //}
 
     //! Default constructor for neutral house
-    public function House()
+    public function House(type:EHouseType, soldiersCount:int)
     {
-        _view = new HouseView(this);
+        _view = newView;
 
         this.setType(EHouseType.EHT_NEUTRAL);
 
@@ -235,20 +248,34 @@ public class House implements IDisposable
 
         _soldierCountMax = 25;
 
+        setSoldierCount(soldiersCount);
+
+        setType(type);
+
         _timerSoldierGenerator = new Timer(1000);
         _timerSoldierGenerator.addEventListener(TimerEvent.TIMER, incrementSoldierCount);
         _timerSoldierGenerator.start();
     }
 
+    protected function get newView():HouseView
+    {
+        return new HouseView(this);
+    }
+
     private function incrementSoldierCount(e:Event):void
     {
-        if (_soldierCount < _soldierCountMax)
+        if (_type != EHouseType.EHT_NEUTRAL)
         {
-            this.setSoldierCount(this.soldierCount + 1);
-        }
-        else if (_soldierCount > _soldierCountMax)
-        {
-            this.setSoldierCount(this.soldierCount - 1);
+            if (_soldierCount < _soldierCountMax
+                    && !(this is Tower)
+                    && !(this is Forge))
+            {
+                this.setSoldierCount(_soldierCount + 1);
+            }
+            else if (_soldierCount >= _soldierCountMax + 1)
+            {
+                this.setSoldierCount(_soldierCount - 1);
+            }
         }
     }
 
@@ -305,8 +332,8 @@ public class House implements IDisposable
 
     private function updateHouseExitPosition():void
     {
-        var houseExitPositionOffset:Point = StaticGameConfiguration.getHouseExitPosition(_type, _level);
-        var squareFrame:Rectangle = StaticGameConfiguration.getHouseSquare(_type, _level);
+        var houseExitPositionOffset:Point = StaticGameConfiguration.getHouseExitPosition(this);
+        var squareFrame:Rectangle = StaticGameConfiguration.getHouseSquare(this);
 
         _houseExitPosition = GameInfo.Instance.pathfinder.getNode(_currentPosition.column + squareFrame.x + houseExitPositionOffset.x,
                 _currentPosition.row + squareFrame.y + houseExitPositionOffset.y);
@@ -315,7 +342,7 @@ public class House implements IDisposable
     //! Returns square of specify house
     private function updateSquare():void
     {
-        var squareFrame:Rectangle = StaticGameConfiguration.getHouseSquare(_type, _level);
+        var squareFrame:Rectangle = StaticGameConfiguration.getHouseSquare(this);
 
         var squareValue:Array = [];
 
@@ -333,13 +360,14 @@ public class House implements IDisposable
 
     public function didReceiveSoldier(soldier:Soldier):void
     {
-        var damage:int = soldier.type == this.type ? soldier.damage : -soldier.damage;
+        //review formula for calculate damage
+        var damage:Number = soldier.type == this.type ? 1 : -soldier.damage/StaticGameConfiguration.getNormalSoldierDamage(_type);
 
         setSoldierCount(_soldierCount + damage);
 
         if (_soldierCount <= 0)
         {
-            //change type
+            setSoldierCount(0);
             setType(soldier.type);
         }
 

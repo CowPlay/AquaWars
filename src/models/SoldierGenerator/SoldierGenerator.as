@@ -22,12 +22,16 @@ import fl.transitions.easing.None;
 
 import flash.events.Event;
 
+import gameObjects.Stable;
+
 import models.GameInfo.GameInfo;
 
 import models.Pathfinder.INode;
 import models.Pathfinder.Node;
 
 import models.Pathfinder.Pathfinder;
+
+import org.osmf.elements.compositeClasses.SerialElementSegment;
 
 import scenes.AquaWars;
 
@@ -41,7 +45,17 @@ public class SoldierGenerator
 
     private var _soldierWaves:Array;
 
+    private var _soldierList: Array;
+
 //    private var _currentDate:Date;
+
+    /*
+    /
+     */
+     public function get soldierList():Array
+     {
+         return _soldierList;
+     }
 
     /*
      * Methods
@@ -57,6 +71,8 @@ public class SoldierGenerator
     private function init():void
     {
         _soldierWaves = [];
+
+        _soldierList = [];
 
 //        _currentDate = new Date();
 
@@ -123,13 +139,15 @@ public class SoldierGenerator
         for each(var waveInfoRemove:SoldierWaveInfo in wavesForRemove)
         {
             var waveIndex:int = _soldierWaves.indexOf(waveInfoRemove);
-            _soldierWaves.splice(waveIndex, waveIndex + 1);
+            _soldierWaves.splice(waveIndex, 1);
         }
     }
 
     private function generateSoldier(waveInfo:SoldierWaveInfo):void
     {
         var newSoldier:Soldier = new Soldier(waveInfo.owner, waveInfo.target);
+
+        _soldierList.unshift(newSoldier);
 
         newSoldier.soldierView.x = newSoldier.currentPosition.view.x + Math.round(newSoldier.soldierView.width / 2) - Node.NodeWidthHalf;
         newSoldier.soldierView.y = newSoldier.currentPosition.view.y;
@@ -147,10 +165,22 @@ public class SoldierGenerator
 
         soldier.soldierView.soldierRotation = getSoldierRotation(nodeFrom, nodeTo);
 
-        var tweenX:Tween = new Tween(soldier.soldierView, "x", None.easeNone, nodeFrom.view.x, nodeTo.view.x, 1 / soldier.speed, true);
-        var tweenY:Tween = new Tween(soldier.soldierView, "y", None.easeNone, nodeFrom.view.y, nodeTo.view.y, 1 / soldier.speed, true);
+        //TODO move to soldier param ond define by class type house
+        if(soldier.houseOwner is Stable)
+        {
+            var soldierSpeed: Number = 1 / soldier.speed/2;
+        }
+        else
+        {
+            soldierSpeed = 1 / soldier.speed;
+        }
+
+
+        var tweenX:Tween = new Tween(soldier.soldierView, "x", None.easeNone, nodeFrom.view.x, nodeTo.view.x,soldierSpeed , true);
+        var tweenY:Tween = new Tween(soldier.soldierView, "y", None.easeNone, nodeFrom.view.y, nodeTo.view.y, soldierSpeed, true);
 
         soldier.soldierView.setTransportableTweens(tweenX, tweenY);
+        soldier.soldierView.setTweenListenerFunction(didMovementFinish);
 
         tweenX.addEventListener(TweenEvent.MOTION_FINISH, didMovementFinish);
     }
@@ -171,6 +201,9 @@ public class SoldierGenerator
             soldierView.owner.houseTarget.didReceiveSoldier(soldierView.owner);
 
             soldierView.owner.cleanup();
+
+            var soldierIndex: int = _soldierList.indexOf(soldierView.owner);
+            _soldierList.splice(soldierIndex, 1)
         }
         else
         {

@@ -7,7 +7,12 @@
  */
 package models.ResourceManager
 {
+import gameObjects.Forge.Forge;
 import gameObjects.House.EHouseType;
+import gameObjects.House.EHouseType;
+import gameObjects.House.House;
+import gameObjects.Stable;
+import gameObjects.Tower.Tower;
 
 //import gameObjects.Soldier.ESoldierType;
 
@@ -67,9 +72,83 @@ public class ResourceManager
     private static var _indicatorLevelUp:Class;
 
 
+
+    [Embed(source="../../../assets/scene.swf", symbol="neutral_tower")]
+    private static var _towerClassNeutral:Class;
+
+    [Embed(source="../../../assets/scene.swf", symbol="player_tower")]
+    private static var _towerClassPlayer:Class;
+
+    [Embed(source="../../../assets/scene.swf", symbol="enemy_tower")]
+    private static var _towerClassEnemy:Class;
+
+
+    [Embed(source="../../../assets/scene.swf", symbol="neutral_forge")]
+    private static var _forgeClassNeutral:Class;
+    [Embed(source="../../../assets/scene.swf", symbol="player_forge")]
+    private static var _forgeClassPlayer:Class;
+    [Embed(source="../../../assets/scene.swf", symbol="enemy_forge")]
+    private static var _forgeClassEnemy:Class;
+
+
+
+    [Embed(source="../../../assets/scene.swf", symbol="neutral_stable")]
+    private static var _stableClassNeutral:Class;
+    [Embed(source="../../../assets/scene.swf", symbol="player_stable")]
+    private static var _stableClassPlayer:Class;
+    [Embed(source="../../../assets/scene.swf", symbol="enemy_stable")]
+    private static var _stableClassEnemy:Class;
+
+
+
+
+    [Embed(source="../../../assets/scene.swf", symbol="enemy_bullet")]
+    private static var _bulletClassEnemy:Class;
+    [Embed(source="../../../assets/scene.swf", symbol="player_bullet")]
+    private static var _bulletClassPlayer:Class;
+    [Embed(source="../../../assets/scene.swf", symbol="neutral_bullet")]
+    private static var _bulletClassNeutral:Class;
+
+
     //! Default constructor
     public function ResourceManager()
     {
+    }
+
+
+    public static function getBulletClassByOwner(owner: Tower):Class
+    {
+        var result:Class;
+
+        switch (owner.type)
+        {
+            case EHouseType.EHT_ENEMY:
+            {
+                result = _bulletClassEnemy;
+                break;
+            }
+
+            case EHouseType.EHT_PLAYER:
+            {
+                result = _bulletClassPlayer;
+                break;
+            }
+
+            case EHouseType.EHT_NEUTRAL:
+            {
+                result = _bulletClassNeutral;
+                break;
+            }
+
+            default :
+            {
+                GameUtils.assert(false);
+            }
+
+        }
+
+        return result;
+
     }
 
     public static function getSceneBackground():Class
@@ -77,20 +156,143 @@ public class ResourceManager
         return _sceneBackground;
     }
 
-    public static function getHouseClassByTypeAndLevel(type:EHouseType, level:int):Class
+    public static function getHouseBaseClassByTypeOwnerAndLevel(owner: House):Class
+    {
+        //TODO switch by the class type
+        var result:Class;
+        if(owner is Stable)
+        {
+            result = getStableClass(owner);
+        }
+        else if (owner is Forge)
+        {
+           result = getForgeClass(owner);
+        }
+        else if (owner is Tower)
+        {
+            result = getTowerClass(owner);
+        }
+        else if (owner is House)
+        {
+            result = getBarracksClass(owner);
+        }
+
+        return result;
+    }
+
+
+    private static function getStableClass(owner:House):Class
     {
         var result:Class;
 
-        switch (type)
+        switch (owner.type)
         {
             case EHouseType.EHT_ENEMY:
             {
-                result = getHouseClassEnemy(level);
+                result = _stableClassEnemy;
                 break;
             }
             case EHouseType.EHT_PLAYER:
             {
-                result = getHouseClassPlayer(level);
+                result = _stableClassPlayer
+                break;
+            }
+            case EHouseType.EHT_NEUTRAL:
+            {
+                result = _stableClassNeutral;
+                break;
+            }
+            default :
+            {
+                //! Not implemented
+                GameUtils.assert(false);
+                break;
+            }
+        }
+
+        return result;
+    }
+
+
+    private static function getForgeClass(owner: House):Class
+    {
+        var result:Class;
+
+        switch (owner.type)
+        {
+            case EHouseType.EHT_ENEMY:
+            {
+                result = _forgeClassEnemy;
+                break;
+            }
+            case EHouseType.EHT_PLAYER:
+            {
+                result = _forgeClassPlayer
+                break;
+            }
+            case EHouseType.EHT_NEUTRAL:
+            {
+                result = _forgeClassNeutral;
+                break;
+            }
+            default :
+            {
+                //! Not implemented
+                GameUtils.assert(false);
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    private static function getTowerClass(owner: House):Class
+    {
+        var result:Class;
+
+        switch (owner.type)
+        {
+            case EHouseType.EHT_ENEMY:
+            {
+                result = _towerClassEnemy;
+                break;
+            }
+            case EHouseType.EHT_PLAYER:
+            {
+                result = _towerClassPlayer
+                break;
+            }
+            case EHouseType.EHT_NEUTRAL:
+            {
+                result = _towerClassNeutral;
+                break;
+            }
+            default :
+            {
+                //! Not implemented
+                GameUtils.assert(false);
+                break;
+            }
+        }
+
+        return result;
+    }
+
+
+    private static function getBarracksClass(owner: House):Class
+    {
+        var result:Class;
+
+        switch (owner.type)
+        {
+            case EHouseType.EHT_ENEMY:
+            {
+                result = getHouseClassEnemy(owner.level);
+                break;
+            }
+            case EHouseType.EHT_PLAYER:
+            {
+                result = getHouseClassPlayer(owner.level);
                 break;
             }
             case EHouseType.EHT_NEUTRAL:
@@ -203,6 +405,7 @@ public class ResourceManager
 
         switch (houseType)
         {
+            case EHouseType.EHT_NEUTRAL:
             case EHouseType.EHT_ENEMY:
             {
                 result = _auraHouseEnemy;

@@ -13,6 +13,7 @@ import gameObjects.House.House;
 
 import models.GameInfo.GameInfo;
 import models.Pathfinder.INode;
+import models.StaticGameConfiguration.StaticGameConfiguration;
 
 public class Soldier implements IDisposable
 {
@@ -50,7 +51,7 @@ public class Soldier implements IDisposable
 
     public function get damage():int
     {
-        return 1;
+        return StaticGameConfiguration.getNormalSoldierDamage(_type);
     }
 
     //! Returns speed value in cells.
@@ -93,6 +94,7 @@ public class Soldier implements IDisposable
 
         _view = new SoldierView(this);
     }
+
 
     /*
      *  IDisposable
