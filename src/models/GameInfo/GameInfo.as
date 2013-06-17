@@ -7,8 +7,10 @@
  */
 package models.GameInfo
 {
+import models.Game.GameBase;
 import models.HouseManager.HouseManager;
 import models.Pathfinder.Pathfinder;
+import models.Players.NPC.NPCLogic;
 import models.SoldierGenerator.SoldierGenerator;
 
 public class GameInfo
@@ -43,6 +45,7 @@ public class GameInfo
     private var _pathfinder:Pathfinder;
     private var _soldierGenerator:SoldierGenerator;
     private var _houseManager:HouseManager;
+    private var _currentGame:GameBase;
 
     /*
      * Properties
@@ -61,6 +64,17 @@ public class GameInfo
     public function get houseManager():HouseManager
     {
         return _houseManager;
+    }
+
+    public function set currentGame(value:GameBase):void
+    {
+        GameUtils.assert(value != null);
+        _currentGame = value;
+    }
+
+    public function get currentGame():GameBase
+    {
+        return _currentGame;
     }
 
     /*

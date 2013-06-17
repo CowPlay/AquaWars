@@ -12,8 +12,6 @@ import flash.geom.Rectangle;
 
 import gameObjects.House.EHouseType;
 
-import org.osmf.metadata.CuePoint;
-
 public class StaticGameConfiguration
 {
     public static function getSoldiersCountMax(houseType:EHouseType, houseLevel:int):int
@@ -81,7 +79,7 @@ public class StaticGameConfiguration
         {
             case EHouseType.EHT_PLAYER:
             {
-                result = new Rectangle(1, 0, 3, 3);
+                result = new Rectangle(1, 0, 4, 4);
                 break;
             }
             case EHouseType.EHT_ENEMY:
@@ -113,7 +111,7 @@ public class StaticGameConfiguration
         {
             case EHouseType.EHT_PLAYER:
             {
-                result = new Point(1, 3);
+                result = new Point(3, 4);
                 break;
             }
             case EHouseType.EHT_ENEMY:

@@ -9,15 +9,7 @@ package models.ResourceManager
 {
 import gameObjects.House.EHouseType;
 
-import flash.display.Sprite;
-
 //import gameObjects.Soldier.ESoldierType;
-
-import flash.display.MovieClip;
-
-import flash.ui.GameInput;
-
-import flashx.textLayout.debug.assert;
 
 public class ResourceManager
 {
@@ -74,17 +66,6 @@ public class ResourceManager
     [Embed(source="../../../assets/scene.swf", symbol="indicator_levelUp")]
     private static var _indicatorLevelUp:Class;
 
-    [Embed(source="../../../assets/scene.swf", symbol="indicator_level_2")]
-    private static var _indicatorLevel2:Class;
-
-    [Embed(source="../../../assets/scene.swf", symbol="indicator_level_3")]
-    private static var _indicatorLevel3:Class;
-
-    [Embed(source="../../../assets/scene.swf", symbol="indicator_level_4")]
-    private static var _indicatorLevel4:Class;
-
-    [Embed(source="../../../assets/scene.swf", symbol="indicator_level_5")]
-    private static var _indicatorLevel5:Class;
 
     //! Default constructor
     public function ResourceManager()
@@ -249,46 +230,6 @@ public class ResourceManager
         return _selectedArrow;
     }
 
-    public static function getIndicatorLevel(level:uint):Class
-    {
-        var result:Class;
-
-        switch (level)
-        {
-            case 1:
-            {
-                result = null;
-                break;
-            }
-            case 2:
-            {
-                result = _indicatorLevel2;
-                break;
-            }
-            case 3:
-            {
-                result = _indicatorLevel3;
-                break;
-            }
-            case 4:
-            {
-                result = _indicatorLevel4;
-                break;
-            }
-            case 5:
-            {
-                result = _indicatorLevel5;
-                break;
-            }
-            default :
-            {
-                GameUtils.assert(false);
-                break;
-            }
-        }
-
-        return result;
-    }
 
 
     public static function getIndicatorLevelUpClass():Class

@@ -2,6 +2,8 @@ package models.Pathfinder
 {
 import flash.utils.Dictionary;
 
+import gameObjects.House.EHouseType;
+
 import gameObjects.House.House;
 
 import models.GameConstants.GameConstants;
@@ -17,7 +19,7 @@ public class Pathfinder
 
     private static function getPathHash(nodeFrom:INode, nodeTo:INode):String
     {
-        return  nodeFrom.toString() + ":" + nodeTo.toString();
+        return  nodeFrom.toString() + "#" + nodeTo.toString();
     }
 
     private static function BuildPath(destinationNode:INode, startNode:INode):Array
@@ -145,7 +147,7 @@ public class Pathfinder
 
                 var pathHash:String = getPathHash(houseFrom.houseExitPosition, houseTo.houseExitPosition);
 
-                if(_pathsCache[pathHash] == null)
+                if (_pathsCache[pathHash] == null)
                 {
                     generateAndAddPath(houseFrom.houseExitPosition, houseTo.houseExitPosition);
                 }
@@ -340,6 +342,44 @@ public class Pathfinder
 
         return result;
     }
+
+
+    //! Returns nearest house with specify type. If type = null, returns house with any type
+    public function getNearestHouse(target:House, type:EHouseType = null):House
+    {
+        var result:House = null;
+
+        var minPath:Array = null;
+
+        for each (var house:House in GameInfo.Instance.houseManager.houses)
+        {
+            if (house == target)
+            {
+                continue;
+            }
+
+            if (type != null && house.type != type)
+            {
+                continue;
+            }
+
+            var path:Array = getPath(target.houseExitPosition, house.houseExitPosition);
+
+            if (minPath == null)
+            {
+                minPath = path;
+                result = house;
+            }
+            else
+            {
+                minPath = path.length < minPath.length ? path : minPath;
+                result = house;
+            }
+        }
+
+        return result;
+    }
+
 
 }
 

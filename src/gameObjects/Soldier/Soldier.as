@@ -8,15 +8,16 @@
 package gameObjects.Soldier
 {
 import gameObjects.*;
+import gameObjects.House.EHouseType;
 import gameObjects.House.House;
 
 import models.GameInfo.GameInfo;
-
 import models.Pathfinder.INode;
-import models.Pathfinder.Pathfinder;
 
 public class Soldier implements IDisposable
 {
+    private var _type: EHouseType;
+
     private var _houseOwner:House;
     private var _houseTarget:House;
 
@@ -27,6 +28,10 @@ public class Soldier implements IDisposable
     /*
      * Properties
      */
+    public function get type():EHouseType
+    {
+        return _type;
+    }
 
     public function get houseOwner():House
     {
@@ -65,6 +70,8 @@ public class Soldier implements IDisposable
     }
 
 
+
+
     /*
      * Methods
      */
@@ -77,6 +84,7 @@ public class Soldier implements IDisposable
         GameUtils.assert(target != owner);
 
         _houseOwner = owner;
+        _type = _houseOwner.type;
         _houseTarget = target;
 
         _path = GameInfo.Instance.pathfinder.getPath(_houseOwner.houseExitPosition, _houseTarget.houseExitPosition);

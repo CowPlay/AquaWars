@@ -18,6 +18,8 @@ import gameObjects.BaseView;
 import gameObjects.House.EHouseType;
 import gameObjects.House.House;
 
+import models.Game.Singleplayer.GameSingleplayer;
+
 import models.GameConstants.GameConstants;
 import models.GameInfo.GameInfo;
 
@@ -91,9 +93,12 @@ public class AquaWars extends BaseView
         }
 
         GameInfo.Instance.pathfinder.generateLevelPaths();
+
+        var game:GameSingleplayer = new GameSingleplayer();
+        GameInfo.Instance.currentGame = game;
     }
 
-    private function mouseLeave(e: Event):void
+    private function mouseLeave(e:Event):void
     {
         BaseView.didMouseLeave();
     }
