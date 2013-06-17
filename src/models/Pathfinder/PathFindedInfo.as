@@ -51,9 +51,9 @@ public class PathFindedInfo
     //TODO: change path to paths
     public function PathFindedInfo(from:INode, to:INode, path:Array)
     {
-        GameUtils.assert(from != null);
-        GameUtils.assert(to != null);
-        GameUtils.assert(path != null);
+        Debug.assert(from != null);
+        Debug.assert(to != null);
+        Debug.assert(path != null);
 
         _from = from;
         _to = to;

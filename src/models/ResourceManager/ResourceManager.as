@@ -7,7 +7,10 @@
  */
 package models.ResourceManager
 {
-import gameObjects.House.EHouseType;
+import gameObjects.Houses.Base.EHouseOwner;
+import gameObjects.Houses.Base.EHouseType;
+import gameObjects.Houses.Base.HouseBase;
+import gameObjects.Houses.Tower.Tower;
 
 //import gameObjects.Soldier.ESoldierType;
 
@@ -20,51 +23,46 @@ public class ResourceManager
     [Embed(source="../../../assets/scene.swf", symbol="background")]
     private static var _sceneBackground:Class;
 
-    /*
-     * House classes
-     */
-    [Embed(source="../../../assets/scene.swf", symbol="house_player_barracks_1")]
-    private static var _houseClassNeutral:Class;
 
 
-    /*
-     * Enemy
-     */
-
-    [Embed(source="../../../assets/scene.swf", symbol="house_enemy_barracks_1")]
-    private static var _houseClassEnemyLevel1:Class;
-    [Embed(source="../../../assets/scene.swf", symbol="house_enemy_barracks_2")]
-    private static var _houseClassEnemyLevel2:Class;
-
-    /*
-     * Player
-     */
-
-    [Embed(source="../../../assets/scene.swf", symbol="house_player_barracks_1")]
-    private static var _houseClassPlayerLevel1:Class;
-    [Embed(source="../../../assets/scene.swf", symbol="house_player_barracks_2")]
-    private static var _houseClassPlayerLevel2:Class;
-
-    /*
-     * Soldier classes
-     */
-    [Embed(source="../../../assets/scene.swf", symbol="soldier_enemy_01")]
-    private static var _soldierClassEnemy:Class;
-
-    [Embed(source="../../../assets/scene.swf", symbol="soldier_player_01")]
-    private static var _soldierClassPlayer:Class;
 
 
+     /*
+      * AuraClass
+      */
     [Embed(source="../../../assets/scene.swf", symbol="aura_house_player")]
     private static var _auraHousePlayer:Class;
     [Embed(source="../../../assets/scene.swf", symbol="aura_house_enemy")]
     private static var _auraHouseEnemy:Class;
 
+
+    /*
+     * ArrowViewClass
+     */
     [Embed(source="../../../assets/scene.swf", symbol="arrow_0001")]
     private static var _selectedArrow:Class;
 
+    /*
+     * indicatorLevelUpClass
+     */
     [Embed(source="../../../assets/scene.swf", symbol="indicator_levelUp")]
     private static var _indicatorLevelUp:Class;
+
+
+
+
+
+
+
+     /*
+      * TowerBulletClass
+      */
+    [Embed(source="../../../assets/scene.swf", symbol="enemy_bullet")]
+    private static var _bulletClassEnemy:Class;
+    [Embed(source="../../../assets/scene.swf", symbol="player_bullet")]
+    private static var _bulletClassPlayer:Class;
+    [Embed(source="../../../assets/scene.swf", symbol="neutral_bullet")]
+    private static var _bulletClassNeutral:Class;
 
 
     //! Default constructor
@@ -72,36 +70,82 @@ public class ResourceManager
     {
     }
 
+
+    public static function getBulletClassByOwner(owner:Tower):Class
+    {
+        var result:Class;
+
+        switch (owner.ownerType)
+        {
+            case EHouseOwner.EHO_ENEMY:
+            {
+                result = _bulletClassEnemy;
+                break;
+            }
+
+            case EHouseOwner.EHO_PLAYER:
+            {
+                result = _bulletClassPlayer;
+                break;
+            }
+
+            case EHouseOwner.EHO_NEUTRAL:
+            {
+                result = _bulletClassNeutral;
+                break;
+            }
+
+            default :
+            {
+                Debug.assert(false);
+            }
+
+        }
+
+        return result;
+
+    }
+
     public static function getSceneBackground():Class
     {
         return _sceneBackground;
     }
 
-    public static function getHouseClassByTypeAndLevel(type:EHouseType, level:int):Class
+    //! Returns house view by house type, owner type and house level
+    public static function getHouseViewClass(house:HouseBase):Class
     {
+        Debug.assert(house != null);
+
         var result:Class;
 
-        switch (type)
+        switch (house.type)
         {
-            case EHouseType.EHT_ENEMY:
+            case EHouseType.EHT_BARRACKS:
             {
-                result = getHouseClassEnemy(level);
+                result = ResourceManagerHouseBarracks.getBarracksViewClass(house);
                 break;
             }
-            case EHouseType.EHT_PLAYER:
+
+            case EHouseType.EHT_STABLE:
             {
-                result = getHouseClassPlayer(level);
+                result = ResourceManagerHouseStable.getStableViewClass(house);
                 break;
             }
-            case EHouseType.EHT_NEUTRAL:
+
+            case EHouseType.EHT_TOWER:
             {
-                result = _houseClassPlayerLevel1;
+                result = ResourceManagerHouseTower.getTowerViewClass(house);
+                break;
+            }
+
+            case EHouseType.EHT_SMITHY:
+            {
+                result = ResourceManagerHouseTower.getTowerViewClass(house);
                 break;
             }
             default :
             {
-                //! Not implemented
-                GameUtils.assert(false);
+                Debug.assert(false);
                 break;
             }
         }
@@ -109,113 +153,26 @@ public class ResourceManager
         return result;
     }
 
-    private static function getHouseClassEnemy(level:int):Class
+    public static function getHouseAura(ownerType:EHouseOwner):Class
     {
         var result:Class;
 
-        switch (level)
+        switch (ownerType)
         {
-            case 1:
-            {
-                result = _houseClassEnemyLevel1;
-                break;
-
-            }
-            case 2:
-            {
-                result = _houseClassEnemyLevel2;
-                break;
-            }
-            default :
-            {
-                GameUtils.assert(false);
-                break;
-            }
-        }
-
-        return result;
-
-    }
-
-    private static function getHouseClassPlayer(level:int):Class
-    {
-        var result:Class;
-
-        switch (level)
-        {
-            case 1:
-            {
-                result = _houseClassPlayerLevel1;
-                break;
-
-            }
-            case 2:
-            {
-                result = _houseClassPlayerLevel2;
-                break;
-            }
-            default :
-            {
-                GameUtils.assert(false);
-                break;
-            }
-        }
-
-        return result;
-
-    }
-
-    public static function getSoldierClassByOwnerTypeAndLevel(type:EHouseType, level:int = 1):Class
-    {
-        var result:Class;
-
-        switch (type)
-        {
-            case EHouseType.EHT_ENEMY:
-            {
-                result = _soldierClassEnemy;
-                break;
-            }
-            case EHouseType.EHT_PLAYER:
-            {
-                result = _soldierClassPlayer;
-                break;
-            }
-            case EHouseType.EHT_NEUTRAL:
-            {
-                GameUtils.assert(false);
-                break;
-            }
-            default:
-            {
-                //! Not implemented
-                GameUtils.assert(false);
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    public static function getHouseAura(houseType:EHouseType):Class
-    {
-        var result:Class;
-
-        switch (houseType)
-        {
-            case EHouseType.EHT_ENEMY:
+            case EHouseOwner.EHO_NEUTRAL:
+            case EHouseOwner.EHO_ENEMY:
             {
                 result = _auraHouseEnemy;
                 break;
             }
-            case EHouseType.EHT_PLAYER:
+            case EHouseOwner.EHO_PLAYER:
             {
                 result = _auraHousePlayer;
                 break;
             }
             default:
             {
-                GameUtils.assert(false);
+                Debug.assert(false);
                 break;
             }
         }
@@ -229,7 +186,6 @@ public class ResourceManager
     {
         return _selectedArrow;
     }
-
 
 
     public static function getIndicatorLevelUpClass():Class

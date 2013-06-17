@@ -10,6 +10,13 @@ package models.GameConstants
 public class GameConstants
 {
     /*
+     * Constants
+     */
+    public static const INDEX_NONE:int = -1;
+
+
+
+    /*
      * Game config
      */
 
@@ -21,18 +28,18 @@ public class GameConstants
      * Debug
      */
 
-    public static const SHOW_DEBUG_DATA:Boolean = true;
+    public static const SHOW_DEBUG_DATA:Boolean = false;
 
-    public static const SHOW_GRID:Boolean = true;
+    public static const SHOW_GRID:Boolean = false;
 
 
     //AStar
-    public static const SHOW_ASTAR_PATH_RESULT:Boolean = true;
+    public static const SHOW_ASTAR_PATH_RESULT:Boolean = false;
     public static const SHOW_ASTAR_PATH_DEBUG:Boolean = false;
 
-    //House
+    //Barracks
     public static const SHOW_HOUSE_POSITION:Boolean = false;
-    public static const SHOW_HOUSE_SQUARE:Boolean = true;
-    public static const SHOW_HOUSE_EXIT:Boolean = true;
+    public static const SHOW_HOUSE_SQUARE:Boolean = false;
+    public static const SHOW_HOUSE_EXIT:Boolean = false;
 }
 }

@@ -5,7 +5,7 @@
  * Time: 10:58 AM
  * To change this template use File | Settings | File Templates.
  */
-package gameObjects.House
+package scenes.game.views.Houses
 {
 import flash.display.MovieClip;
 import flash.display.Sprite;
@@ -16,7 +16,7 @@ import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.utils.setTimeout;
 
-import gameObjects.BaseView;
+import gameObjects.Houses.Base.*;
 import gameObjects.IDisposable;
 
 import models.GameConstants.GameConstants;
@@ -24,10 +24,11 @@ import models.Pathfinder.INode;
 import models.Pathfinder.Node;
 import models.ResourceManager.ResourceManager;
 
-import scenes.views.arrow.ArrowView;
+import scenes.game.views.ArrowView;
+import scenes.views.BaseView;
 
-//! Represents view\controller of House
-public class HouseView extends BaseView implements IDisposable
+//! Represents view\controller of house base
+public class HouseBaseView extends BaseView implements IDisposable
 {
     /*
      * Fields
@@ -35,77 +36,51 @@ public class HouseView extends BaseView implements IDisposable
     private var _textFieldSoldiersCount:TextField;
     private var _textFormat:TextFormat;
 
-    private var _owner:House;
-    private var _ownerType:EHouseType;
+    private var _owner:HouseBase;
+    //Cache of owner config
+    private var _ownerType:EHouseOwner;
     private var _ownerLevel:uint;
     private var _ownerPosition:INode;
-    private var _ownerSoldiersCount:uint;
+    private var _ownerSoldiersCount:int;
+
+    //! Container which contains all house views except arrow
+    private var _houseEventHandler:Sprite;
 
     //! Represents house view
     private var _houseView:Sprite;
-
-    private var _arrowView:ArrowView;
 
     private var _auraView:Sprite;
 
     private var _indicatorLevelUp:MovieClip;
 
+    private var _arrowView:ArrowView;
+
 
     /*
      * Properties
      */
-    public function get Owner():House
+    public function get owner():HouseBase
     {
         return _owner;
     }
 
-
     /*
-     * Methods
+     * Events
      */
 
-    //! Default constructor
-    public function HouseView(owner:House)
-    {
-        GameUtils.assert(owner != null);
-
-        _owner = owner;
-    }
-
     //TODO: move to update
-    public function didHouseSelectionChanged(isSelect:Boolean):void
+    public function didHousePlayerSelectionChanged(isSelect:Boolean):void
     {
+        Debug.assert(_owner.ownerType == EHouseOwner.EHO_PLAYER);
+
         _auraView.visible = isSelect;
-        _arrowView.show(false);
-    }
-
-    public override function update():void
-    {
-        if (_ownerType != _owner.type)
-        {
-            didOwnerTypeChanged();
-        }
-
-        if (_ownerLevel != _owner.level)
-        {
-            didOwnerLevelChanged();
-        }
-
-        if (_ownerPosition != _owner.currentPosition)
-        {
-            didPositionChanged();
-        }
-
-        if (_ownerSoldiersCount != _owner.soldierCount)
-        {
-            didSoldiersCountChanged();
-        }
+        _arrowView.show(isSelect);
     }
 
     //! Must call when owner type was changed
     private function didOwnerTypeChanged():void
     {
-        _ownerType = _owner.type;
+        _ownerType = _owner.ownerType;
 
         tryCreateAuraView();
 
@@ -148,37 +123,99 @@ public class HouseView extends BaseView implements IDisposable
         }
     }
 
+    private function didPositionChanged():void
+    {
+        _ownerPosition = _owner.currentPosition;
+
+        x = _ownerPosition.view.x + Math.round(width / 2) - Node.NodeWidthHalf;
+        y = _ownerPosition.view.y;
+    }
+
+    //TODO: implement constaint for last time attack
+    public function didAttackOrHeal(damage:Number):void
+    {
+        var glowFilter:GlowFilter = new GlowFilter(damage < 0 ? 0xff0000 : 0x00ff00, 0.5, 12, 12);
+
+        this.filters = [glowFilter];
+
+        setTimeout(didAttackFinished, 200);
+    }
+
+    private function didAttackFinished():void
+    {
+        this.filters = [];
+    }
+
+    /*
+     * Methods
+     */
+
+    //! Default constructor
+    public function HouseBaseView(owner:HouseBase)
+    {
+        Debug.assert(owner != null);
+
+        _owner = owner;
+
+        _houseEventHandler = new Sprite();
+
+        this.eventHandler = _houseEventHandler;
+    }
+
+    public override function update():void
+    {
+        if (_ownerType != _owner.ownerType)
+        {
+            didOwnerTypeChanged();
+        }
+
+        if (_ownerLevel != _owner.level)
+        {
+            didOwnerLevelChanged();
+        }
+
+        if (_ownerPosition != _owner.currentPosition)
+        {
+            didPositionChanged();
+        }
+
+        if (_ownerSoldiersCount != _owner.soldierCount)
+        {
+            didSoldiersCountChanged();
+        }
+    }
+
+    /*
+     * Creators
+     */
+
     private function tryCreateHouseView():void
     {
         //! Remove old house view if need
         if (_houseView != null)
         {
-            removeChild(_houseView);
+            _houseEventHandler.removeChild(_houseView);
             _houseView = null;
         }
 
         //Change house view
         {
-            var houseClass:Class = ResourceManager.getHouseClassByTypeAndLevel(_ownerType, _ownerLevel);
+            var houseClass:Class = ResourceManager.getHouseViewClass(_owner);
             _houseView = new houseClass();
 
-            this.eventHandler = this;
-
-            addChild(_houseView);
+            _houseEventHandler.addChild(_houseView);
         }
     }
-
 
     private function tryCreateArrowView():void
     {
         if (_arrowView != null)
         {
             removeChild(_arrowView.rootView);
-
             _arrowView = null;
         }
 
-        if (_ownerType == EHouseType.EHT_PLAYER)
+        if (_ownerType == EHouseOwner.EHO_PLAYER)
         {
             _arrowView = new ArrowView();
 
@@ -191,31 +228,28 @@ public class HouseView extends BaseView implements IDisposable
         //! Remove old aura view if need
         if (_auraView != null)
         {
-            removeChild(_auraView);
+            _houseEventHandler.removeChild(_auraView);
+            _auraView = null;
         }
 
         //change aura view
-        if (_ownerType != EHouseType.EHT_NEUTRAL)
-        {
-            var auraClass:Class = ResourceManager.getHouseAura(_ownerType);
+        var auraClass:Class = ResourceManager.getHouseAura(_ownerType);
 
-            _auraView = new auraClass();
-            _auraView.visible = false;
+        _auraView = new auraClass();
+        _auraView.visible = false;
 
-            addChild(_auraView);
-        }
+        _houseEventHandler.addChild(_auraView);
     }
 
     private function tryCreateLevelUpIndicator():void
     {
         if (_indicatorLevelUp != null)
         {
-            //TODO move change type
-            removeChild(_indicatorLevelUp);
+            _houseEventHandler.removeChild(_indicatorLevelUp);
             _indicatorLevelUp = null;
         }
 
-        if (_ownerType == EHouseType.EHT_PLAYER)
+        if (_ownerType == EHouseOwner.EHO_PLAYER)
         {
             var indicatorClass:Class = ResourceManager.getIndicatorLevelUpClass();
 
@@ -223,7 +257,7 @@ public class HouseView extends BaseView implements IDisposable
             _indicatorLevelUp.x = 11;
             _indicatorLevelUp.y = -37;
 
-            addChild(_indicatorLevelUp);
+            _houseEventHandler.addChild(_indicatorLevelUp);
 
             _indicatorLevelUp.visible = _owner.readyToUpdate;
         }
@@ -233,7 +267,8 @@ public class HouseView extends BaseView implements IDisposable
     {
         if (_textFieldSoldiersCount != null)
         {
-            removeChild(_textFieldSoldiersCount);
+            _houseEventHandler.removeChild(_textFieldSoldiersCount);
+            _textFieldSoldiersCount = null;
         }
 
         _textFieldSoldiersCount = new TextField();
@@ -254,31 +289,10 @@ public class HouseView extends BaseView implements IDisposable
         _textFieldSoldiersCount.x = 0;
         _textFieldSoldiersCount.y = -70;
 
-        addChild(_textFieldSoldiersCount);
+        _houseEventHandler.addChild(_textFieldSoldiersCount);
     }
 
-    private function didPositionChanged():void
-    {
-        _ownerPosition = _owner.currentPosition;
 
-        x = _ownerPosition.view.x + Math.round(width / 2) - Node.NodeWidthHalf;
-        y = _ownerPosition.view.y;
-    }
-
-    //TODO: implement constaint for last time attack
-    public function didAttackOrHeal(damage:int):void
-    {
-        var glowFilter:GlowFilter = new GlowFilter(damage < 0 ? 0xff0000 : 0x00ff00, 0.5, 12, 12);
-
-        this.filters = [glowFilter];
-
-        setTimeout(didAttackFinished, 200);
-    }
-
-    private function didAttackFinished():void
-    {
-        this.filters = [];
-    }
 
     /*
      * BaseView
@@ -299,7 +313,7 @@ public class HouseView extends BaseView implements IDisposable
 
         if (GameConstants.SHOW_HOUSE_SQUARE)
         {
-            for each(var node:INode in _owner.getSquare())
+            for each(var node:INode in _owner.foundation)
             {
                 node.drawDebugData(0x222222);
             }
@@ -317,21 +331,20 @@ public class HouseView extends BaseView implements IDisposable
     {
         _auraView.visible = true;
 
-//        if(House.selectedHouses.indexOf(_owner) != -1)
-//        {
-//            _arrowView.show(false);
-//        }
+        //hide arrow
+        if (_owner.ownerType == EHouseOwner.EHO_PLAYER)
+        {
+            _arrowView.show(false);
+        }
 
         super.didMouseOver(e);
     }
 
     protected override function didMouseOut(e:Event):void
     {
-        if (_owner.type == EHouseType.EHT_PLAYER && House.selectedHouses.length > 0)
+        if (_owner.ownerType == EHouseOwner.EHO_PLAYER && HouseBase.selectedHouses.length > 0)
         {
-            House.selectHouse(_owner);
-
-            _arrowView.show(true);
+            HouseBase.selectHousePlayer(_owner);
         }
         else
         {
@@ -344,11 +357,9 @@ public class HouseView extends BaseView implements IDisposable
 
     protected override function didMouseDown(e:Event):void
     {
-        if (_ownerType == EHouseType.EHT_PLAYER)
+        if (_ownerType == EHouseOwner.EHO_PLAYER)
         {
-            House.selectHouse(_owner);
-
-            _arrowView.show(true);
+            HouseBase.selectHousePlayer(_owner);
         }
 
         super.didMouseDown(e);
@@ -361,37 +372,14 @@ public class HouseView extends BaseView implements IDisposable
         //generate soldiers, update view
         _owner.didMouseUp();
 
-        //if selected house does not exist
-        if (BaseView.viewSelected != null && BaseView.viewSelected != this)
-        {
-            //hide arrows
-            for each(var house:House in House.selectedHouses)
-            {
-                house.view._arrowView.show(false);
-            }
-        }
-        else
-        {
-            _auraView.visible = true;
-
-            if(_arrowView)
-            {
-                _arrowView.show(false);
-            }
-        }
+        _auraView.visible = true;
 
         super.didMouseUp(e);
     }
 
     protected override function didMouseUpOut():void
     {
-        //hide arrows
-        for each(var house:House in House.selectedHouses)
-        {
-            house.view._arrowView.show(false);
-        }
-
-        House.clearHouseSelection();
+        HouseBase.clearHouseSelection();
 
         super.didMouseUpOut();
     }
@@ -416,16 +404,18 @@ public class HouseView extends BaseView implements IDisposable
 
     private static function updateArrowSize(e:MouseEvent):void
     {
-        for each(var house:House in House.selectedHouses)
+        for each(var house:HouseBase in HouseBase.selectedHouses)
         {
-            //update arrow size
-            house.view._arrowView.didMouseMove(e);
+            if (house.view._arrowView != null)
+            {
+                house.view._arrowView.didMouseMove(e);
+            }
         }
     }
 
     protected override function didDoubleClick(e:Event):void
     {
-        if (_owner.readyToUpdate && _owner.type == EHouseType.EHT_PLAYER)
+        if (_owner.readyToUpdate && _owner.ownerType == EHouseOwner.EHO_PLAYER)
         {
             _owner.didLevelUp();
         }

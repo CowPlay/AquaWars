@@ -10,7 +10,6 @@ package models.GameInfo
 import models.Game.GameBase;
 import models.HouseManager.HouseManager;
 import models.Pathfinder.Pathfinder;
-import models.Players.NPC.NPCLogic;
 import models.SoldierGenerator.SoldierGenerator;
 
 public class GameInfo
@@ -68,7 +67,7 @@ public class GameInfo
 
     public function set currentGame(value:GameBase):void
     {
-        GameUtils.assert(value != null);
+        Debug.assert(value != null);
         _currentGame = value;
     }
 

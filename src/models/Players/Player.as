@@ -5,11 +5,24 @@
  * Time: 8:48 PM
  * To change this template use File | Settings | File Templates.
  */
-package models.Players {
+package models.Players
+{
+import gameObjects.IDisposable;
 
 //! Base class of all player types
-public class Player {
-    public function Player() {
+public class Player    implements IDisposable
+{
+    public function Player()
+    {
+    }
+
+    /*
+     *  IDisposable
+     */
+
+    public function cleanup():void
+    {
+
     }
 }
 }

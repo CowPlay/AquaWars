@@ -5,7 +5,7 @@
  * Time: 6:00 PM
  * To change this template use File | Settings | File Templates.
  */
-package gameObjects
+package scenes.views
 {
 import flash.display.DisplayObjectContainer;
 import flash.display.MovieClip;
@@ -14,13 +14,7 @@ import flash.events.MouseEvent;
 import flash.events.TimerEvent;
 import flash.utils.Timer;
 
-import gameObjects.House.HouseView;
-
 import models.GameConstants.GameConstants;
-
-import scenes.AquaWars;
-
-import scenes.views.arrow.ArrowView;
 
 //! Base class of all clickable objects
 public class BaseView extends MovieClip
@@ -98,7 +92,7 @@ public class BaseView extends MovieClip
         if (_eventHandler)
         {
             _eventHandler.doubleClickEnabled = true;
-            _eventHandler.mouseChildren = false;
+            //_eventHandler.mouseChildren = false;
 
             _eventHandler.addEventListener(MouseEvent.MOUSE_OVER, didMouseOver);
             _eventHandler.addEventListener(MouseEvent.MOUSE_OUT, didMouseOut);
@@ -129,8 +123,11 @@ public class BaseView extends MovieClip
     {
         this.eventHandler = null;
 
-        _timerDebugDataRenderer.stop();
-        _timerDebugDataRenderer = null;
+        if(_timerDebugDataRenderer)
+        {
+            _timerDebugDataRenderer.stop();
+            _timerDebugDataRenderer = null;
+        }
     }
 
     public function update():void

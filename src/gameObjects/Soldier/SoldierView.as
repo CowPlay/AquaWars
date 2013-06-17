@@ -8,12 +8,13 @@
 package gameObjects.Soldier
 {
 import fl.transitions.Tween;
-
-import gameObjects.BaseView;
-
-import models.ResourceManager.ResourceManager;
+import fl.transitions.TweenEvent;
 
 import flash.display.MovieClip;
+
+import models.ResourceManager.ResourceManagerSoldier;
+
+import scenes.views.BaseView;
 
 public class SoldierView extends BaseView
 {
@@ -28,6 +29,7 @@ public class SoldierView extends BaseView
 
     private var _tweenX:Tween;
     private var _tweenY:Tween;
+    private var _tweenEventListener: Function;
 
     /*
      * Properties
@@ -91,7 +93,7 @@ public class SoldierView extends BaseView
             }
             default :
             {
-                GameUtils.assert(false);
+                Debug.assert(false);
                 break;
             }
         }
@@ -105,11 +107,11 @@ public class SoldierView extends BaseView
     //! Default constructor
     public function SoldierView(owner:Soldier)
     {
-        GameUtils.assert(owner != null);
+        Debug.assert(owner != null);
 
         _owner = owner;
 
-        var soldierClass:Class = ResourceManager.getSoldierClassByOwnerTypeAndLevel(_owner.houseOwner.type);
+        var soldierClass:Class = ResourceManagerSoldier.getSoldierClassByOwner(_owner.houseOwner);
 
         _soldierView = new soldierClass;
 
@@ -124,10 +126,25 @@ public class SoldierView extends BaseView
         _tweenY = tweenY;
     }
 
+    public function setTweenListenerFunction(func: Function):void
+    {
+        _tweenEventListener = func;
+    }
 
+    public function removeTweenEventListener():void
+    {
+        _tweenX.removeEventListener(TweenEvent.MOTION_FINISH, _tweenEventListener);
+        _tweenX = null;
+        _tweenY = null;
+    }
     /*
      * IDisposable
      */
+
+
+
+
+
 
     public override function cleanup():void
     {

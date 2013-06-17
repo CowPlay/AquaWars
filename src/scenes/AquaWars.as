@@ -9,30 +9,19 @@
 package scenes
 {
 
-import flash.display.Bitmap;
-import flash.display.MovieClip;
 import flash.display.Sprite;
 import flash.events.Event;
 
-import gameObjects.BaseView;
-import gameObjects.House.EHouseType;
-import gameObjects.House.House;
+import gameObjects.Houses.Barracks.Barracks;
+import gameObjects.Houses.Base.HouseBase;
 
 import models.Game.Singleplayer.GameSingleplayer;
-
-import models.GameConstants.GameConstants;
 import models.GameInfo.GameInfo;
-
-import models.ResourceManager.ResourceManager;
-
-
 import models.Pathfinder.INode;
 import models.Pathfinder.Node;
-import models.Pathfinder.Pathfinder;
-import models.SoldierGenerator.SoldierGenerator;
+import models.ResourceManager.ResourceManager;
 
-import mx.resources.ResourceBundle;
-
+import scenes.views.BaseView;
 
 [SWF(width="1000", height="650")]
 public class AquaWars extends BaseView
@@ -87,7 +76,7 @@ public class AquaWars extends BaseView
 
         GameInfo.Instance.houseManager.initLevelHouses();
 
-        for each(var house:House in GameInfo.Instance.houseManager.houses)
+        for each(var house:HouseBase in GameInfo.Instance.houseManager.houses)
         {
             AquaWars.scene.addChild(house.view);
         }

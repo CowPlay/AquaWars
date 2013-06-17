@@ -35,7 +35,7 @@ public class GameBase
 
     public function get type():EGameType
     {
-        GameUtils.assert(false);
+        Debug.assert(false);
         return null;
     }
 

@@ -7,11 +7,10 @@
  */
 package models.SoldierGenerator
 {
-import gameObjects.House.House;
+import gameObjects.Houses.Base.HouseBase;
 
 public class SoldierWaveInfo
 {
-    //TODO: add last generated time
 
     /*
      * Fields
@@ -20,8 +19,8 @@ public class SoldierWaveInfo
     public var generatedSoldierRest:uint;
     public var generatedSoldierCount:uint;
 
-    public var owner:House;
-    public var target:House;
+    public var owner:HouseBase;
+    public var target:HouseBase;
 
     public var timeGeneratedLast:Number;
     public var timeGeneratedFrequency:Number;

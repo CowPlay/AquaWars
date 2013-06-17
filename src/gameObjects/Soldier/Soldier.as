@@ -8,18 +8,19 @@
 package gameObjects.Soldier
 {
 import gameObjects.*;
-import gameObjects.House.EHouseType;
-import gameObjects.House.House;
+import gameObjects.Houses.Base.EHouseOwner;
+import gameObjects.Houses.Base.HouseBase;
 
+import models.GameConfiguration.Soldier.GameConfigurationSoldierDamage;
 import models.GameInfo.GameInfo;
 import models.Pathfinder.INode;
 
 public class Soldier implements IDisposable
 {
-    private var _type: EHouseType;
+    private var _type:EHouseOwner;
 
-    private var _houseOwner:House;
-    private var _houseTarget:House;
+    private var _houseOwner:HouseBase;
+    private var _houseTarget:HouseBase;
 
     private var _view:SoldierView;
 
@@ -28,17 +29,17 @@ public class Soldier implements IDisposable
     /*
      * Properties
      */
-    public function get type():EHouseType
+    public function get type():EHouseOwner
     {
         return _type;
     }
 
-    public function get houseOwner():House
+    public function get houseOwner():HouseBase
     {
         return _houseOwner;
     }
 
-    public function get houseTarget():House
+    public function get houseTarget():HouseBase
     {
         return _houseTarget;
     }
@@ -50,7 +51,7 @@ public class Soldier implements IDisposable
 
     public function get damage():int
     {
-        return 1;
+        return GameConfigurationSoldierDamage.getNormalSoldierDamage(_type);
     }
 
     //! Returns speed value in cells.
@@ -70,29 +71,28 @@ public class Soldier implements IDisposable
     }
 
 
-
-
     /*
      * Methods
      */
 
     //! Default constructor
-    public function Soldier(owner:House, target:House)
+    public function Soldier(owner:HouseBase, target:HouseBase)
     {
-        GameUtils.assert(owner != null);
-        GameUtils.assert(target != null);
-        GameUtils.assert(target != owner);
+        Debug.assert(owner != null);
+        Debug.assert(target != null);
+        Debug.assert(target != owner);
 
         _houseOwner = owner;
-        _type = _houseOwner.type;
+        _type = _houseOwner.ownerType;
         _houseTarget = target;
 
         _path = GameInfo.Instance.pathfinder.getPath(_houseOwner.houseExitPosition, _houseTarget.houseExitPosition);
 
-        GameUtils.assert(_path.length > 0);
+        Debug.assert(_path.length > 0);
 
         _view = new SoldierView(this);
     }
+
 
     /*
      *  IDisposable
@@ -111,7 +111,5 @@ public class Soldier implements IDisposable
         _view.cleanup();
         _view = null;
     }
-
-
 }
 }

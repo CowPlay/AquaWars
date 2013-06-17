@@ -5,18 +5,13 @@
  * Time: 6:18 PM
  * To change this template use File | Settings | File Templates.
  */
-package gameObjects.House
+package gameObjects.Houses.Base
 {
-public final class EHouseType
+public final class EHouseOwner
 {
-    public static const EHT_PLAYER:EHouseType = new EHouseType();
-    public static const EHT_ENEMY:EHouseType = new EHouseType();
-    public static const EHT_NEUTRAL:EHouseType = new EHouseType();
-
-
-    public function EHouseType()
-    {
-    }
+    public static const EHO_PLAYER:EHouseOwner = new EHouseOwner();
+    public static const EHO_ENEMY:EHouseOwner = new EHouseOwner();
+    public static const EHO_NEUTRAL:EHouseOwner = new EHouseOwner();
 
     public function toString():String
     {
@@ -24,24 +19,24 @@ public final class EHouseType
 
         switch (this)
         {
-            case EHT_PLAYER:
+            case EHO_PLAYER:
             {
-                result = "EHT_PLAYER";
+                result = "EHO_PLAYER";
                 break;
             }
-            case EHT_ENEMY:
+            case EHO_ENEMY:
             {
-                result = "EHT_ENEMY";
+                result = "EHO_ENEMY";
                 break;
             }
-            case EHT_NEUTRAL:
+            case EHO_NEUTRAL:
             {
-                result = "EHT_NEUTRAL";
+                result = "EHO_NEUTRAL";
                 break;
             }
             default :
             {
-                GameUtils.assert(false);
+                Debug.assert(false);
                 break;
             }
         }

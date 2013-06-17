@@ -1,7 +1,8 @@
 package models.Pathfinder
 {
-import gameObjects.BaseView;
 import gameObjects.IDisposable;
+
+import scenes.views.BaseView;
 
 //! Interface which provide node for AStar algorithm
 public interface INode extends IDisposable

@@ -2,13 +2,12 @@ package models.Pathfinder
 {
 import flash.utils.Dictionary;
 
-import gameObjects.House.EHouseType;
-
-import gameObjects.House.House;
+import gameObjects.Houses.Barracks.Barracks;
+import gameObjects.Houses.Base.EHouseOwner;
+import gameObjects.Houses.Base.HouseBase;
 
 import models.GameConstants.GameConstants;
 import models.GameInfo.GameInfo;
-
 
 //! Class which contains info about level grid and provide find path functionally
 public class Pathfinder
@@ -129,16 +128,16 @@ public class Pathfinder
 
         var pathHash:String = getPathHash(nodeFrom, nodeTo);
 
-        GameUtils.assert(_pathsCache[pathHash] != null);
+        Debug.assert(_pathsCache[pathHash] != null);
 
         return  _pathsCache[pathHash].nodePathClone;
     }
 
     public function generateLevelPaths():void
     {
-        for each(var houseFrom:House in GameInfo.Instance.houseManager.houses)
+        for each(var houseFrom:HouseBase in GameInfo.Instance.houseManager.houses)
         {
-            for each(var houseTo:House in GameInfo.Instance.houseManager.houses)
+            for each(var houseTo:HouseBase in GameInfo.Instance.houseManager.houses)
             {
                 if (houseFrom == houseTo)
                 {
@@ -227,7 +226,7 @@ public class Pathfinder
             if (openNodes.length == 0)
             {
                 //path does not exist
-                GameUtils.assert(false);
+                Debug.assert(false);
             }
 
             openNodes.sortOn('f', Array.NUMERIC);
@@ -333,8 +332,8 @@ public class Pathfinder
     {
         var result:INode = null;
 
-        GameUtils.assert(0 <= row && row < GameConstants.GRID_ROW_COUNT);
-        GameUtils.assert(0 <= column && column < GameConstants.GRID_COLUMN_COUNT);
+        Debug.assert(0 <= row && row < GameConstants.GRID_ROW_COUNT);
+        Debug.assert(0 <= column && column < GameConstants.GRID_COLUMN_COUNT);
 
         var rowEntry:Array = _grid[row] as Array;
 
@@ -345,20 +344,20 @@ public class Pathfinder
 
 
     //! Returns nearest house with specify type. If type = null, returns house with any type
-    public function getNearestHouse(target:House, type:EHouseType = null):House
+    public function getNearestHouse(target:HouseBase, type:EHouseOwner = null):HouseBase
     {
-        var result:House = null;
+        var result:HouseBase = null;
 
         var minPath:Array = null;
 
-        for each (var house:House in GameInfo.Instance.houseManager.houses)
+        for each (var house:HouseBase in GameInfo.Instance.houseManager.houses)
         {
             if (house == target)
             {
                 continue;
             }
 
-            if (type != null && house.type != type)
+            if (type != null && house.ownerType != type)
             {
                 continue;
             }

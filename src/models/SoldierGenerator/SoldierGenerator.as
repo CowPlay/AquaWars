@@ -8,30 +8,27 @@
 
 package models.SoldierGenerator
 {
-import flash.events.TimerEvent;
-import flash.utils.Timer;
-
-import gameObjects.House.House;
-import gameObjects.Soldier.ESoldierRotation;
-import gameObjects.Soldier.Soldier;
-import gameObjects.Soldier.SoldierView;
-
 import fl.transitions.Tween;
 import fl.transitions.TweenEvent;
 import fl.transitions.easing.None;
 
 import flash.events.Event;
+import flash.events.TimerEvent;
+import flash.utils.Timer;
 
-import models.GameInfo.GameInfo;
+import gameObjects.Houses.Base.HouseBase;
+import gameObjects.Houses.Stable.Stable;
+import gameObjects.IDisposable;
+import gameObjects.Soldier.ESoldierRotation;
+import gameObjects.Soldier.Soldier;
+import gameObjects.Soldier.SoldierView;
 
 import models.Pathfinder.INode;
 import models.Pathfinder.Node;
 
-import models.Pathfinder.Pathfinder;
-
 import scenes.AquaWars;
 
-public class SoldierGenerator
+public class SoldierGenerator implements IDisposable
 {
     /*
      * Fields
@@ -41,7 +38,15 @@ public class SoldierGenerator
 
     private var _soldierWaves:Array;
 
-//    private var _currentDate:Date;
+    private var _soldierList: Array;
+
+    /*
+     * Properties
+     */
+     public function get soldierList():Array
+     {
+         return _soldierList;
+     }
 
     /*
      * Methods
@@ -58,17 +63,17 @@ public class SoldierGenerator
     {
         _soldierWaves = [];
 
-//        _currentDate = new Date();
+        _soldierList = [];
 
         _timerSoldierGenerator = new Timer(250);
         _timerSoldierGenerator.addEventListener(TimerEvent.TIMER, processWave);
         _timerSoldierGenerator.start();
     }
 
-    public function generateSoldiers(owner:House, target:House):void
+    public function generateSoldiers(owner:HouseBase, target:HouseBase):void
     {
-        GameUtils.assert(owner != null);
-        GameUtils.assert(target != null);
+        Debug.assert(owner != null);
+        Debug.assert(target != null);
 
         var newWave:SoldierWaveInfo = new SoldierWaveInfo();
 
@@ -123,7 +128,7 @@ public class SoldierGenerator
         for each(var waveInfoRemove:SoldierWaveInfo in wavesForRemove)
         {
             var waveIndex:int = _soldierWaves.indexOf(waveInfoRemove);
-            _soldierWaves.splice(waveIndex, waveIndex + 1);
+            _soldierWaves.splice(waveIndex, 1);
         }
     }
 
@@ -131,11 +136,13 @@ public class SoldierGenerator
     {
         var newSoldier:Soldier = new Soldier(waveInfo.owner, waveInfo.target);
 
+        _soldierList.unshift(newSoldier);
+
         newSoldier.soldierView.x = newSoldier.currentPosition.view.x + Math.round(newSoldier.soldierView.width / 2) - Node.NodeWidthHalf;
         newSoldier.soldierView.y = newSoldier.currentPosition.view.y;
 
         AquaWars.scene.addChild(newSoldier.soldierView);
-        waveInfo.owner.didSoldierGenerate();
+        waveInfo.owner.didSoldierLeaveHouse();
 
         moveSoldierToNextNode(newSoldier);
     }
@@ -147,10 +154,22 @@ public class SoldierGenerator
 
         soldier.soldierView.soldierRotation = getSoldierRotation(nodeFrom, nodeTo);
 
-        var tweenX:Tween = new Tween(soldier.soldierView, "x", None.easeNone, nodeFrom.view.x, nodeTo.view.x, 1 / soldier.speed, true);
-        var tweenY:Tween = new Tween(soldier.soldierView, "y", None.easeNone, nodeFrom.view.y, nodeTo.view.y, 1 / soldier.speed, true);
+        //TODO move to soldier param ond define by class type house
+        if(soldier.houseOwner is Stable)
+        {
+            var soldierSpeed: Number = 1 / soldier.speed/2;
+        }
+        else
+        {
+            soldierSpeed = 1 / soldier.speed;
+        }
+
+
+        var tweenX:Tween = new Tween(soldier.soldierView, "x", None.easeNone, nodeFrom.view.x, nodeTo.view.x,soldierSpeed , true);
+        var tweenY:Tween = new Tween(soldier.soldierView, "y", None.easeNone, nodeFrom.view.y, nodeTo.view.y, soldierSpeed, true);
 
         soldier.soldierView.setTransportableTweens(tweenX, tweenY);
+        soldier.soldierView.setTweenListenerFunction(didMovementFinish);
 
         tweenX.addEventListener(TweenEvent.MOTION_FINISH, didMovementFinish);
     }
@@ -168,9 +187,12 @@ public class SoldierGenerator
 
         if (soldierPath[soldierPath.length - 1] == soldierPath[0])
         {
-            soldierView.owner.houseTarget.didReceiveSoldier(soldierView.owner);
+            soldierView.owner.houseTarget.didSoldierComeHouse(soldierView.owner);
 
             soldierView.owner.cleanup();
+
+            var soldierIndex: int = _soldierList.indexOf(soldierView.owner);
+            _soldierList.splice(soldierIndex, 1)
         }
         else
         {
@@ -180,9 +202,9 @@ public class SoldierGenerator
 
     private static function getSoldierRotation(from:INode, to:INode):ESoldierRotation
     {
-        GameUtils.assert(from != null);
-        GameUtils.assert(to != null);
-        GameUtils.assert(from.row != to.row || from.column != to.column);
+        Debug.assert(from != null);
+        Debug.assert(to != null);
+        Debug.assert(from.row != to.row || from.column != to.column);
 
         var result:ESoldierRotation;
 
@@ -229,6 +251,18 @@ public class SoldierGenerator
         }
 
         return result;
+    }
+
+    /*
+     * IDisposable
+     */
+
+    public function cleanup():void
+    {
+        _timerSoldierGenerator.stop();
+        _timerSoldierGenerator = null;
+
+        //TODO: cleanup _soldierWaves and _soldierList
     }
 }
 }

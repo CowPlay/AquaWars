@@ -1,15 +1,11 @@
 package models.Pathfinder
 {
 
-import gameObjects.BaseView;
-
-import flash.display.MovieClip;
 import flash.display.Sprite;
-import flash.events.Event;
 
 import models.GameConstants.GameConstants;
 
-import scenes.AquaWars;
+import scenes.views.BaseView;
 
 public class Node extends BaseView implements INode
 {

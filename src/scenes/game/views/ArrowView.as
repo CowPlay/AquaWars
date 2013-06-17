@@ -5,19 +5,13 @@
  * Time: 2:11 AM
  * To change this template use File | Settings | File Templates.
  */
-package scenes.views.arrow
+package scenes.game.views
 {
 import flash.display.Sprite;
 import flash.events.MouseEvent;
 import flash.geom.Point;
 
-import gameObjects.BaseView;
-import gameObjects.House.House;
-import gameObjects.House.HouseView;
-
 import models.ResourceManager.ResourceManager;
-
-import scenes.AquaWars;
 
 public class ArrowView
 {

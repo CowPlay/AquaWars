@@ -9,13 +9,8 @@ package
 {
 
 
-public class GameUtils
+public class Debug
 {
-    public function GameUtils()
-    {
-    }
-
-
     public static function assert(expression:Boolean):void
     {
         //TODO: implement only when debug session
