@@ -49,7 +49,14 @@ public class ResourceManager
     private static var _indicatorLevelUp:Class;
 
 
+     /*
+      * pause class
+      */
 
+    [Embed(source="../../../assets/scene.swf", symbol="pause_stop")]
+    private static var _pauseStop:Class;
+    [Embed(source="../../../assets/scene.swf", symbol="pause_play")]
+    private static var _pausePlay:Class;
 
 
 
@@ -193,5 +200,15 @@ public class ResourceManager
         return _indicatorLevelUp;
     }
 
+
+    public static function get PauseStopClass():Class
+    {
+        return _pauseStop;
+    }
+
+    public static function get PausePlayClass():Class
+    {
+        return _pausePlay;
+    }
 }
 }

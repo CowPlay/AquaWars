@@ -11,9 +11,13 @@ import flash.display.Sprite;
 import flash.events.MouseEvent;
 import flash.geom.Point;
 
+import gameObjects.Houses.Base.HouseBase;
+
 import models.ResourceManager.ResourceManager;
 
-public class ArrowView
+import scenes.views.BaseView;
+
+public class ArrowView extends BaseView
 {
     /*
      * Fields
@@ -31,6 +35,10 @@ public class ArrowView
         return _rootView;
     }
 
+    public function get rootViewWidth():Number
+    {
+        return _rootViewWidth;
+    }
     /*
      * Methods
      */
@@ -51,9 +59,11 @@ public class ArrowView
 
         _rootView.scaleX = 0;
 
+        eventHandler = _rootView;
+
     }
 
-    public function didMouseMove(e:MouseEvent):void
+    public function DidMouseMove(e:MouseEvent):void
     {
         var rootViewPositionAbsolute:Point = _rootView.parent.localToGlobal(new Point(_rootView.x, _rootView.y));
 
@@ -62,7 +72,7 @@ public class ArrowView
         _rootView.scaleX = -Math.sqrt(Math.pow((point.x - rootViewPositionAbsolute.x), 2) + Math.pow((point.y - rootViewPositionAbsolute.y), 2)) / _rootViewWidth;
 
         _rootView.rotation = Math.atan2(rootViewPositionAbsolute.y - point.y, rootViewPositionAbsolute.x - point.x) / Math.PI * 180;
-    }
+}
 
     public function show(isShow:Boolean):void
     {
@@ -72,6 +82,18 @@ public class ArrowView
         _rootView.visible = isShow;
 
         _rootView.scaleX = isShow ? _rootView.scaleX : 0;
+    }
+
+    public function magnetizeFromTargetHouse(targetHouse: HouseBase):void
+    {
+        var rootViewPositionAbsolute:Point = _rootView.parent.localToGlobal(new Point(_rootView.x, _rootView.y));
+        _rootView.rotation = Math.atan2(rootViewPositionAbsolute.y - targetHouse.view.y, rootViewPositionAbsolute.x - targetHouse.view.x) / Math.PI * 180;
+        var ellipseHalfWidth: Number = 70;
+        var ellipseHalfHeight: Number = 30;
+        var fi: Number = _rootView.rotation;
+        var ellipseRadius: Number = ellipseHalfWidth*ellipseHalfHeight/Math.sqrt(Math.pow(ellipseHalfHeight, 2)*Math.pow(Math.cos(fi), 2) + Math.pow(ellipseHalfWidth, 2)*Math.pow(Math.sin(fi), 2));
+        _rootView.scaleX = (-Math.sqrt(Math.pow((rootViewPositionAbsolute.x - targetHouse.view.x), 2) + Math.pow((rootViewPositionAbsolute.y - targetHouse.view.y), 2)) + ellipseRadius) / _rootViewWidth;
+
     }
 
 

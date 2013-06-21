@@ -7,11 +7,15 @@
  */
 package scenes.game.views.Houses
 {
+import flash.display.DisplayObject;
+import flash.display.DisplayObjectContainer;
+import flash.display.MovieClip;
 import flash.display.MovieClip;
 import flash.display.Sprite;
 import flash.events.Event;
 import flash.events.MouseEvent;
 import flash.filters.GlowFilter;
+import flash.geom.Point;
 import flash.text.TextField;
 import flash.text.TextFormat;
 import flash.utils.setTimeout;
@@ -19,10 +23,15 @@ import flash.utils.setTimeout;
 import gameObjects.Houses.Base.*;
 import gameObjects.IDisposable;
 
+import models.Game.Singleplayer.GameSingleplayer;
+
 import models.GameConstants.GameConstants;
+import models.GameInfo.GameInfo;
 import models.Pathfinder.INode;
 import models.Pathfinder.Node;
 import models.ResourceManager.ResourceManager;
+
+import scenes.AquaWars;
 
 import scenes.game.views.ArrowView;
 import scenes.views.BaseView;
@@ -84,11 +93,11 @@ public class HouseBaseView extends BaseView implements IDisposable
 
         tryCreateAuraView();
 
+        tryCreateArrowView();
+
         tryCreateHouseView();
 
         tryCreateTextFieldSoldierCount();
-
-        tryCreateArrowView();
 
         tryCreateLevelUpIndicator();
     }
@@ -129,6 +138,12 @@ public class HouseBaseView extends BaseView implements IDisposable
 
         x = _ownerPosition.view.x + Math.round(width / 2) - Node.NodeWidthHalf;
         y = _ownerPosition.view.y;
+
+        if (_arrowView != null)
+        {
+            _arrowView.rootView.x = x;
+            _arrowView.rootView.y = y;
+        }
     }
 
     //TODO: implement constaint for last time attack
@@ -150,6 +165,7 @@ public class HouseBaseView extends BaseView implements IDisposable
      * Methods
      */
 
+
     //! Default constructor
     public function HouseBaseView(owner:HouseBase)
     {
@@ -157,10 +173,16 @@ public class HouseBaseView extends BaseView implements IDisposable
 
         _owner = owner;
 
+        tryCreateArrowView();
+
         _houseEventHandler = new Sprite();
+
+        addChild(_houseEventHandler);
 
         this.eventHandler = _houseEventHandler;
     }
+
+
 
     public override function update():void
     {
@@ -211,7 +233,7 @@ public class HouseBaseView extends BaseView implements IDisposable
     {
         if (_arrowView != null)
         {
-            removeChild(_arrowView.rootView);
+            GameSingleplayer(GameInfo.Instance.currentGame).scene.arrowContainer.removeChild(_arrowView.rootView);
             _arrowView = null;
         }
 
@@ -219,7 +241,12 @@ public class HouseBaseView extends BaseView implements IDisposable
         {
             _arrowView = new ArrowView();
 
-            addChild(_arrowView.rootView);
+            _arrowView.rootView.x = x;
+            _arrowView.rootView.y = y;
+
+            GameSingleplayer(GameInfo.Instance.currentGame).scene.arrowContainer.addChild(_arrowView.rootView);
+
+
         }
     }
 
@@ -322,6 +349,59 @@ public class HouseBaseView extends BaseView implements IDisposable
         super.showDebugData(e);
     }
 
+
+    public function magnetizeFromTargetHouse(targetHouse: HouseBase):void
+    {
+        _arrowView.magnetizeFromTargetHouse(targetHouse);
+    }
+
+
+
+    //!Pause
+    public function stopAnimationHouseView():void
+    {
+        for( var i: int = 0; i < _houseView.numChildren; i++)
+        {
+            if (_houseView.getChildAt(i) is MovieClip)
+            {
+                MovieClip(_houseView.getChildAt(i)).stop();
+            }
+            if (_houseView.getChildAt(i) is DisplayObjectContainer)
+            {
+                for(var j: int = 0; j < DisplayObjectContainer(_houseView.getChildAt(i)).numChildren; j++)
+                {
+                    if (DisplayObjectContainer(_houseView.getChildAt(i)).getChildAt(j) is MovieClip)
+                    {
+                        MovieClip(DisplayObjectContainer(_houseView.getChildAt(i)).getChildAt(j)).stop();
+                    }
+                }
+            }
+        }
+    }
+
+    //!Play
+    public function playAnimationHouseView():void
+    {
+        for( var i: int = 0; i < _houseView.numChildren; i++)
+        {
+            if (_houseView.getChildAt(i) is MovieClip)
+            {
+                MovieClip(_houseView.getChildAt(i)).play();
+            }
+            if (_houseView.getChildAt(i) is DisplayObjectContainer)
+            {
+                for(var j: int = 0; j < DisplayObjectContainer(_houseView.getChildAt(i)).numChildren; j++)
+                {
+                    if (DisplayObjectContainer(_houseView.getChildAt(i)).getChildAt(j) is MovieClip)
+                    {
+                        MovieClip(DisplayObjectContainer(_houseView.getChildAt(i)).getChildAt(j)).play();
+                    }
+                }
+            }
+        }
+    }
+
+
     /*
      * Event handlers
      */
@@ -336,6 +416,8 @@ public class HouseBaseView extends BaseView implements IDisposable
         {
             _arrowView.show(false);
         }
+
+
 
         super.didMouseOver(e);
     }
@@ -391,6 +473,18 @@ public class HouseBaseView extends BaseView implements IDisposable
         updateArrowSize(mouseEvent);
 
         super.didMouseMove(e);
+
+        if (HouseBase.selectedHouses.length > 0)
+        {
+            for each(var houseBase: HouseBase in HouseBase.selectedHouses)
+            {
+                if (houseBase != _owner)
+                {
+                    houseBase.magnetizeFromTargetHouse(_owner);
+                }
+
+            }
+        }
     }
 
     protected override function didMouseMoveOut(e:Event):void
@@ -408,7 +502,7 @@ public class HouseBaseView extends BaseView implements IDisposable
         {
             if (house.view._arrowView != null)
             {
-                house.view._arrowView.didMouseMove(e);
+                house.view._arrowView.DidMouseMove(e);
             }
         }
     }

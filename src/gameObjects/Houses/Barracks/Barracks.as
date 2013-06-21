@@ -62,6 +62,18 @@ public class Barracks extends HouseBase
         }
     }
 
+
+    public function stopSoldierGenerator():void
+    {
+        _timerSoldierGenerator.stop();
+    }
+
+    public function playSoldierGenerator():void
+    {
+        _timerSoldierGenerator.start();
+    }
+
+
     /*
      * IDisposable
      */

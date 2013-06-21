@@ -354,6 +354,13 @@ public class HouseBase implements IDisposable
         setFoundation(squareValue);
     }
 
+    public function magnetizeFromTargetHouse(targetHouse: HouseBase):void
+    {
+        _view.magnetizeFromTargetHouse(targetHouse);
+    }
+
+
+
     /*
      * IDisposable
      */

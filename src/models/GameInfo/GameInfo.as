@@ -12,6 +12,8 @@ import models.HouseManager.HouseManager;
 import models.Pathfinder.Pathfinder;
 import models.SoldierGenerator.SoldierGenerator;
 
+import scenes.AquaWars;
+
 public class GameInfo
 {
 
@@ -50,6 +52,7 @@ public class GameInfo
      * Properties
      */
 
+
     public function get pathfinder():Pathfinder
     {
         return _pathfinder;
@@ -65,7 +68,8 @@ public class GameInfo
         return _houseManager;
     }
 
-    public function set currentGame(value:GameBase):void
+
+    public function setCurrentGame(value:GameBase):void
     {
         Debug.assert(value != null);
         _currentGame = value;

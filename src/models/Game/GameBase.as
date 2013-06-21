@@ -9,6 +9,7 @@ package models.Game
 {
 import models.Players.Player;
 
+
 //! Base class of all game types
 public class GameBase
 {

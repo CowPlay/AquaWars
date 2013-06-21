@@ -137,6 +137,27 @@ public class SoldierView extends BaseView
         _tweenX = null;
         _tweenY = null;
     }
+
+
+    //!Pause
+    public function soldierMoveStop():void
+    {
+        _tweenX.stop();
+        _tweenY.stop();
+
+
+        MovieClip(_soldierView.getChildAt(0)).stop();
+    }
+
+    public function soldierMovePlay():void
+    {
+        _tweenX.resume();
+        _tweenY.resume();
+
+        MovieClip(_soldierView.getChildAt(0)).play();
+    }
+
+
     /*
      * IDisposable
      */

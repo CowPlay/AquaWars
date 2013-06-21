@@ -253,6 +253,25 @@ public class SoldierGenerator implements IDisposable
         return result;
     }
 
+    //!Pause
+    public function stopSoldiersMove():void
+    {
+        _timerSoldierGenerator.stop();
+        for each(var soldier:Soldier in _soldierList)
+        {
+            soldier.soldierView.soldierMoveStop();
+        }
+    }
+
+    public function playSoldiersMove():void
+    {
+        _timerSoldierGenerator.start();
+        for each(var soldier:Soldier in _soldierList)
+        {
+            soldier.soldierView.soldierMovePlay();
+        }
+    }
+
     /*
      * IDisposable
      */
