@@ -2,17 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="183200d1-063f-480c-8ebf-daa45fb47af1" name="Default" comment="Merge branch 'master' of https://github.com/CowPlay/AquaWars&#10;&#10;Conflicts:&#10;&#9;.idea/workspace.xml&#10;&#9;src/models/GameConstants/GameConstants.as&#10;">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/assets/GUi.swf" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/GUI/Panels/ActionPanel.as" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/GUI/Panels/BottomPanel.as" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/GUI/ChoiceWorld.as" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/GUI/GameMap.as" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/models/Game/Singleplayer/GameSingleplayerScene.as" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/GUI/Interface.as" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/GUI/Buttons/Music.as" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/GUI/Buttons/Pause.as" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/models/ResourceManager/ResourceManagerGUI.as" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/GUI/Panels/TopPanel.as" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/GUI/Village.as" />
+      <change type="MOVED" beforePath="C:\Workspace\AquaWars\src\scenes\AquaWars.as" afterPath="$PROJECT_DIR$/src/models/Game/Singleplayer/GameSingleplayerScene.as" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/assets/scene.swf" afterPath="$PROJECT_DIR$/assets/scene.swf" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/scenes/AquaWars.as" afterPath="$PROJECT_DIR$/src/scenes/AquaWars.as" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/AquaWars.iml" afterPath="$PROJECT_DIR$/AquaWars.iml" />
@@ -802,7 +803,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-4" y="-4" width="1608" height="864" extended-state="1" />
+    <frame x="-4" y="-4" width="1608" height="864" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298077" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -810,7 +811,7 @@
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2465181" sideWeight="0.5823681" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2465181" sideWeight="0.5823681" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32451254" sideWeight="0.41763192" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
